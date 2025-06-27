@@ -110,23 +110,33 @@ def health_check():
         'working_dir': os.getcwd()
     }
 
+@app.route('/favicon.ico')
+def favicon():
+    """返回空的favicon响应，避免404错误"""
+    return '', 204
+
 @app.route('/')
 def index():
     """主页面"""
     try:
-        # 测试模板目录和文件
-        template_dir = os.path.join(os.getcwd(), 'templates')
-        index_file = os.path.join(template_dir, 'index.html') 
-        base_file = os.path.join(template_dir, 'base.html')
+        # 详细的路径调试信息
+        current_file = os.path.abspath(__file__)
+        current_dir = os.path.dirname(current_file)
+        template_dir_calculated = os.path.join(current_dir, 'templates')
         
-        # 检查文件是否存在
-        files_exist = {
-            'template_dir': os.path.exists(template_dir),
-            'index_html': os.path.exists(index_file),
-            'base_html': os.path.exists(base_file),
+        debug_info = {
+            'current_file': current_file,
+            'current_dir': current_dir,
+            'template_dir_calculated': template_dir_calculated,
             'app_template_folder': app.template_folder,
-            'working_dir': os.getcwd()
+            'template_dir_exists': os.path.exists(template_dir_calculated),
+            'working_dir': os.getcwd(),
+            'template_files': []
         }
+        
+        # 列出模板文件
+        if os.path.exists(template_dir_calculated):
+            debug_info['template_files'] = os.listdir(template_dir_calculated)
         
         return render_template('index.html')
     except Exception as e:
@@ -135,15 +145,14 @@ def index():
         
         return f"""
         <html>
-        <head><title>Financial Reporting System</title></head>
+        <head><title>Financial Reporting System - Debug</title></head>
         <body>
             <h1>Financial Reporting System</h1>
             <h2>Templates directory issue: {str(e)}</h2>
             <h3>Debug Information:</h3>
             <pre>{error_details}</pre>
-            <p>Working directory: {os.getcwd()}</p>
-            <p>Template folder: {app.template_folder}</p>
-            <p>Files check: {files_exist if 'files_exist' in locals() else 'Check failed'}</p>
+            <h3>Path Information:</h3>
+            <pre>{debug_info if 'debug_info' in locals() else 'Debug info not available'}</pre>
             <a href="/health">Health Check</a>
         </body>
         </html>
@@ -2261,13 +2270,31 @@ def delete_file():
 @app.errorhandler(404)
 def not_found_error(error):
     """404错误处理"""
-    return render_template('404.html'), 404
+    return """
+    <html>
+    <head><title>404 - Page Not Found</title></head>
+    <body>
+        <h1>404 - Page Not Found</h1>
+        <p>The requested page could not be found.</p>
+        <a href="/">Return to Home</a>
+    </body>
+    </html>
+    """, 404
 
 
 @app.errorhandler(500)
 def internal_error(error):
     """500错误处理"""
-    return render_template('500.html'), 500
+    return """
+    <html>
+    <head><title>500 - Internal Server Error</title></head>
+    <body>
+        <h1>500 - Internal Server Error</h1>
+        <p>An internal server error occurred.</p>
+        <a href="/">Return to Home</a>
+    </body>
+    </html>
+    """, 500
 
 
 if __name__ == '__main__':
