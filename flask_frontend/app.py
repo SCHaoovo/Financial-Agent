@@ -97,10 +97,35 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
+@app.route('/health')
+def health_check():
+    """健康检查 - 不依赖模板"""
+    return {
+        'status': 'ok',
+        'message': 'Flask frontend is running',
+        'templates_dir': app.template_folder,
+        'working_dir': os.getcwd()
+    }
+
 @app.route('/')
 def index():
     """主页面"""
-    return render_template('index.html')
+    try:
+        return render_template('index.html')
+    except Exception as e:
+        # 如果模板不存在，返回简单的HTML响应
+        return f"""
+        <html>
+        <head><title>Financial Reporting System</title></head>
+        <body>
+            <h1>Financial Reporting System</h1>
+            <p>Templates directory issue: {str(e)}</p>
+            <p>Working directory: {os.getcwd()}</p>
+            <p>Template folder: {app.template_folder}</p>
+            <a href="/health">Health Check</a>
+        </body>
+        </html>
+        """
 
 
 @app.route('/upload', methods=['GET', 'POST'])
