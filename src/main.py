@@ -70,9 +70,14 @@ app = FastAPI(
 # 添加CORS中间件
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # 生产环境中应该限制来源
+    allow_origins=[
+        "http://localhost:5000",
+        "http://127.0.0.1:5000", 
+        "https://*.onrender.com",
+        "*"  # 临时允许所有来源，用于调试
+    ],
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
 
