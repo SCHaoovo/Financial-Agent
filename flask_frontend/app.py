@@ -13,6 +13,7 @@ import shutil
 from datetime import datetime
 import time
 from pathlib import Path
+import traceback
 
 # 修复导入路径问题 - 适配Render环境
 try:
@@ -111,17 +112,36 @@ def health_check():
 def index():
     """主页面"""
     try:
+        # 测试模板目录和文件
+        template_dir = os.path.join(os.getcwd(), 'templates')
+        index_file = os.path.join(template_dir, 'index.html') 
+        base_file = os.path.join(template_dir, 'base.html')
+        
+        # 检查文件是否存在
+        files_exist = {
+            'template_dir': os.path.exists(template_dir),
+            'index_html': os.path.exists(index_file),
+            'base_html': os.path.exists(base_file),
+            'app_template_folder': app.template_folder,
+            'working_dir': os.getcwd()
+        }
+        
         return render_template('index.html')
     except Exception as e:
-        # 如果模板不存在，返回简单的HTML响应
+        # 如果模板不存在，返回详细的调试信息
+        error_details = traceback.format_exc()
+        
         return f"""
         <html>
         <head><title>Financial Reporting System</title></head>
         <body>
             <h1>Financial Reporting System</h1>
-            <p>Templates directory issue: {str(e)}</p>
+            <h2>Templates directory issue: {str(e)}</h2>
+            <h3>Debug Information:</h3>
+            <pre>{error_details}</pre>
             <p>Working directory: {os.getcwd()}</p>
             <p>Template folder: {app.template_folder}</p>
+            <p>Files check: {files_exist if 'files_exist' in locals() else 'Check failed'}</p>
             <a href="/health">Health Check</a>
         </body>
         </html>
