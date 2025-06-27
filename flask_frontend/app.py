@@ -31,7 +31,9 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # 创建Flask应用
-app = Flask(__name__)
+current_dir = os.path.dirname(os.path.abspath(__file__))
+template_dir = os.path.join(current_dir, 'templates')
+app = Flask(__name__, template_folder=template_dir)
 
 # 配置密钥
 app.secret_key = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
