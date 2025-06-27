@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}Server Error - Financial Reporting System{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="text-center">
+            <div class="mb-4">
+                <i class="fas fa-server text-danger" style="font-size: 5rem;"></i>
+            </div>
+            <h1 class="display-4 text-muted">500</h1>
+            <h4 class="mb-4">Internal Server Error</h4>
+            <p class="text-muted mb-4">
+                Sorry, the server encountered an error and could not complete your request. Please try again later. If the problem persists, please contact technical support.
+            </p>
+            <div>
+                <a href="{{ url_for('index') }}" class="btn btn-primary me-2">
+                    <i class="fas fa-home me-1"></i>Back to Home
+                </a>
+                <button onclick="window.history.back()" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-1"></i>Go Back
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

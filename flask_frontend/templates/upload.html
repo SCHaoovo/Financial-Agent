@@ -1,0 +1,622 @@
+{% extends "base.html" %}
+
+{% block title %}File Upload - Financial Reporting System{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">
+                    <i class="fas fa-upload me-2"></i>Financial Data File Upload
+                </h4>
+            </div>
+            <div class="card-body">
+                <p class="text-muted mb-4">
+                    Please select the processing method first, and the system will show the corresponding file upload requirements.
+                </p>
+
+                <form method="POST" enctype="multipart/form-data" id="uploadForm">
+                    <!-- Basic Information -->
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="entity" class="form-label">
+                                <i class="fas fa-building me-1"></i>Entity Name *
+                            </label>
+                            <input type="text" class="form-control" id="entity" name="entity" 
+                                   placeholder="e.g., Hao Company" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="financial_year" class="form-label">
+                                <i class="fas fa-calendar me-1"></i>Financial Year <span id="financial_year_required" class="text-danger">*</span>
+                            </label>
+                            <input type="text" class="form-control" id="financial_year" name="financial_year" 
+                                   placeholder="e.g., 2026Forecast">
+                        </div>
+                    </div>
+
+                    <!-- Processing Options -->
+                    <div class="card bg-light mb-4">
+                        <div class="card-header">
+                            <h6 class="mb-0">
+                                <i class="fas fa-cogs me-1"></i>Select Processing Method
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input process-option" type="radio" name="process_type" id="process_summary" value="summary">
+                                        <label class="form-check-label" for="process_summary">
+                                            <strong>Data Summary</strong>
+                                            <div class="text-muted small">Generate financial data summary</div>
+                                        </label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input process-option" type="radio" name="process_type" id="process_database" value="database">
+                                        <label class="form-check-label" for="process_database">
+                                            <strong>Structured Database</strong>
+                                            <div class="text-muted small">Multiple summary files to standardized database</div>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input process-option" type="radio" name="process_type" id="process_visualization" value="visualization">
+                                        <label class="form-check-label" for="process_visualization">
+                                            <strong>Data Visualization</strong>
+                                            <div class="text-muted small">Generate financial charts from database</div>
+                                        </label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input process-option" type="radio" name="process_type" id="process_reporting" value="reporting">
+                                        <label class="form-check-label" for="process_reporting">
+                                            <strong>Intelligent Reporting</strong>
+                                            <div class="text-muted small">AI-generated financial reports from database</div>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <hr>
+                            <!-- 暂时移除工作流功能
+                            <div class="form-check">
+                                <input class="form-check-input process-option" type="radio" name="process_type" id="process_workflow" value="workflow">
+                                <label class="form-check-label" for="process_workflow">
+                                    <strong>Integrated Workflow</strong>
+                                    <div class="text-muted small">Execute complete end-to-end processing (from raw files to all outputs)</div>
+                                </label>
+                            </div>
+                            -->
+                        </div>
+                    </div>
+
+                    <!-- Dynamic File Upload Area -->
+                    <div id="file-upload-container">
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Please select a processing method first, then upload the corresponding files.
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ url_for('index') }}" class="btn btn-secondary me-md-2">
+                            <i class="fas fa-arrow-left me-1"></i>Back to Home
+                        </a>
+                        <button type="submit" class="btn btn-primary" id="submitBtn" disabled>
+                            <i class="fas fa-cloud-upload-alt me-1"></i>Upload and Process
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Dependency Diagram -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-sitemap me-1"></i>Processing Workflow Dependencies
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-2">
+                        <div class="process-flow-item">
+                            <i class="fas fa-file-excel fa-2x text-primary mb-2"></i>
+                            <h6>Raw Files</h6>
+                            <small>PL + BS</small>
+                        </div>
+                    </div>
+                    <div class="col-md-1">
+                        <i class="fas fa-arrow-right fa-2x text-muted mt-3"></i>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="process-flow-item">
+                            <i class="fas fa-table fa-2x text-success mb-2"></i>
+                            <h6>Data Summary</h6>
+                            <small>summary.xlsx</small>
+                        </div>
+                    </div>
+                    <div class="col-md-1">
+                        <i class="fas fa-arrow-right fa-2x text-muted mt-3"></i>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="process-flow-item">
+                            <i class="fas fa-database fa-2x text-warning mb-2"></i>
+                            <h6>Structured Database</h6>
+                            <small>database.xlsx</small>
+                        </div>
+                    </div>
+                    <div class="col-md-1">
+                        <i class="fas fa-arrow-right fa-2x text-muted mt-3"></i>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="process-flow-item">
+                            <i class="fas fa-chart-bar fa-2x text-info mb-2"></i>
+                            <i class="fas fa-file-alt fa-2x text-danger mb-2 ms-1"></i>
+                            <h6>Visualization + Reports</h6>
+                            <small>charts + reports</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-3 text-center">
+                    <small class="text-muted">
+                        * Each processing step depends on the output from the previous step
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- File Upload Templates -->
+<script type="text/template" id="summary-upload-template">
+    <div class="card border-primary">
+        <div class="card-header bg-primary text-white">
+            <h6 class="mb-0">
+                <i class="fas fa-upload me-1"></i>Data Summary - Upload Raw Financial Files
+            </h6>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <label for="pl_file" class="form-label">
+                        <i class="fas fa-file-excel me-1"></i>PL File *
+                    </label>
+                    <input type="file" class="form-control" id="pl_file" name="pl_file" 
+                           accept=".xlsx,.xls" required>
+                    <div class="mt-1 text-muted">
+                        <small>Upload Profit & Loss Excel file</small>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <label for="bs_file" class="form-label">
+                        <i class="fas fa-file-excel me-1"></i>BS File *
+                    </label>
+                    <input type="file" class="form-control" id="bs_file" name="bs_file" 
+                           accept=".xlsx,.xls" required>
+                    <div class="mt-1 text-muted">
+                        <small>Upload Balance Sheet Excel file</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</script>
+
+<script type="text/template" id="database-upload-template">
+    <div class="card border-success">
+        <div class="card-header bg-success text-white">
+            <h6 class="mb-0">
+                <i class="fas fa-upload me-1"></i>Structured Database - Upload Summary Files
+            </h6>
+        </div>
+        <div class="card-body">
+            <div id="summary-files-container">
+                <!-- Initial file upload box -->
+                <div class="summary-file-row mb-3">
+                    <div class="row align-items-end">
+                        <div class="col-md-10">
+                            <label class="form-label">
+                                <i class="fas fa-file-excel me-1"></i>Summary File 1 *
+                            </label>
+                            <input type="file" class="form-control summary-file-input" 
+                                   name="summary_files" accept=".xlsx,.xls" required>
+                            <div class="mt-1 text-muted">
+                                <small>Upload summary file (.xlsx or .xls)</small>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="button" class="btn btn-outline-danger btn-sm remove-file-btn" 
+                                    style="display: none;">
+                                <i class="fas fa-trash"></i> Remove
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Add file button -->
+            <div class="mb-3">
+                <button type="button" class="btn btn-outline-success btn-sm" id="add-summary-file-btn">
+                    <i class="fas fa-plus me-1"></i>Add More Files
+                </button>
+            </div>
+            
+            <!-- File list display -->
+            <div id="selected-files-summary" class="alert alert-light" style="display: none;">
+                <strong>Selected Files:</strong>
+                <ul class="mb-0 mt-2" id="file-list-summary"></ul>
+            </div>
+            
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-1"></i>
+                This function requires output files from the data summary step as input. You can add multiple summary files.
+            </div>
+        </div>
+    </div>
+</script>
+
+<script type="text/template" id="visualization-upload-template">
+    <div class="card border-warning">
+        <div class="card-header bg-warning text-white">
+            <h6 class="mb-0">
+                <i class="fas fa-upload me-1"></i>Data Visualization - Upload Database File
+            </h6>
+        </div>
+        <div class="card-body">
+            <div class="mb-3">
+                <label for="database_file" class="form-label">
+                    <i class="fas fa-database me-1"></i>Database File *
+                </label>
+                <input type="file" class="form-control" id="database_file" name="database_file" 
+                       accept=".xlsx,.xls" required>
+                <div class="mt-1 text-muted">
+                    <small>Upload structured database output file</small>
+                </div>
+            </div>
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-1"></i>
+                This function requires the output file from the structured database step as input.
+            </div>
+        </div>
+    </div>
+</script>
+
+<script type="text/template" id="reporting-upload-template">
+    <div class="card border-info">
+        <div class="card-header bg-info text-white">
+            <h6 class="mb-0">
+                <i class="fas fa-upload me-1"></i>Intelligent Reporting - Upload Database File
+            </h6>
+        </div>
+        <div class="card-body">
+            <div class="mb-3">
+                <label for="database_file_report" class="form-label">
+                    <i class="fas fa-database me-1"></i>Database File *
+                </label>
+                <input type="file" class="form-control" id="database_file_report" name="database_file" 
+                       accept=".xlsx,.xls" required>
+                <div class="mt-1 text-muted">
+                    <small>Upload structured database output file</small>
+                </div>
+            </div>
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-1"></i>
+                This function requires the output file from the structured database step as input.
+            </div>
+        </div>
+    </div>
+</script>
+
+<!-- 暂时移除工作流功能
+<script type="text/template" id="workflow-upload-template">
+    <div class="card border-dark">
+        <div class="card-header bg-dark text-white">
+            <h6 class="mb-0">
+                <i class="fas fa-upload me-1"></i>Integrated Workflow - Upload Raw Financial Files
+            </h6>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <label for="pl_file_workflow" class="form-label">
+                        <i class="fas fa-file-excel me-1"></i>PL File *
+                    </label>
+                    <input type="file" class="form-control" id="pl_file_workflow" name="pl_file" 
+                           accept=".xlsx,.xls" required>
+                    <div class="mt-1 text-muted">
+                        <small>Upload Profit & Loss Excel file</small>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <label for="bs_file_workflow" class="form-label">
+                        <i class="fas fa-file-excel me-1"></i>BS File *
+                    </label>
+                    <input type="file" class="form-control" id="bs_file_workflow" name="bs_file" 
+                           accept=".xlsx,.xls" required>
+                    <div class="mt-1 text-muted">
+                        <small>Upload Balance Sheet Excel file</small>
+                    </div>
+                </div>
+            </div>
+            <div class="alert alert-success mt-3">
+                <i class="fas fa-magic me-1"></i>
+                Integrated workflow will automatically execute all processing steps: Summary → Database → Visualization → Reports
+            </div>
+        </div>
+    </div>
+</script>
+-->
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    let fileCounter = 1;
+    
+    // Switch file upload area when processing method changes
+    $('.process-option').change(function() {
+        const selectedType = $(this).val();
+        const container = $('#file-upload-container');
+        const submitBtn = $('#submitBtn');
+        const financialYearInput = $('#financial_year');
+        const financialYearRequired = $('#financial_year_required');
+        
+        // 根据处理类型控制financial_year字段是否必填
+        if (selectedType === 'summary' /* || selectedType === 'workflow' */) {
+            // summary需要financial_year (workflow暂时移除)
+            financialYearInput.prop('required', true);
+            financialYearRequired.show();
+        } else {
+            // 其他类型不需要financial_year
+            financialYearInput.prop('required', false);
+            financialYearRequired.hide();
+        }
+        
+        // Clear container
+        container.empty();
+        
+        // Load corresponding upload template based on selection
+        let templateId = '';
+        switch(selectedType) {
+            case 'summary':
+                templateId = 'summary-upload-template';
+                break;
+            case 'database':
+                templateId = 'database-upload-template';
+                break;
+            case 'visualization':
+                templateId = 'visualization-upload-template';
+                break;
+            case 'reporting':
+                templateId = 'reporting-upload-template';
+                break;
+            /* 暂时移除工作流功能
+            case 'workflow':
+                templateId = 'workflow-upload-template';
+                break;
+            */
+        }
+        
+        if (templateId) {
+            const template = $('#' + templateId).html();
+            container.html(template);
+            submitBtn.prop('disabled', false);
+            
+            // Reset file counter
+            fileCounter = 1;
+            
+            // Bind special events for database upload
+            if (selectedType === 'database') {
+                bindDatabaseUploadEvents();
+            }
+        }
+    });
+
+    // Bind event handlers for database upload
+    function bindDatabaseUploadEvents() {
+        // Add file button click event
+        $(document).off('click', '#add-summary-file-btn').on('click', '#add-summary-file-btn', function() {
+            fileCounter++;
+            const newFileRow = `
+                <div class="summary-file-row mb-3">
+                    <div class="row align-items-end">
+                        <div class="col-md-10">
+                            <label class="form-label">
+                                <i class="fas fa-file-excel me-1"></i>Summary File ${fileCounter}
+                            </label>
+                            <input type="file" class="form-control summary-file-input" 
+                                   name="summary_files" accept=".xlsx,.xls">
+                            <div class="mt-1 text-muted">
+                                <small>Upload summary file (.xlsx or .xls)</small>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="button" class="btn btn-outline-danger btn-sm remove-file-btn">
+                                <i class="fas fa-trash"></i> Remove
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            $('#summary-files-container').append(newFileRow);
+            updateRemoveButtons();
+            updateFileList();
+        });
+        
+        // Remove file button click event
+        $(document).off('click', '.remove-file-btn').on('click', '.remove-file-btn', function() {
+            $(this).closest('.summary-file-row').remove();
+            updateRemoveButtons();
+            updateFileList();
+            renumberFiles();
+        });
+        
+        // File selection change event
+        $(document).off('change', '.summary-file-input').on('change', '.summary-file-input', function() {
+            updateFileList();
+            updateFileStatusDisplay($(this));
+        });
+        
+        // Initialize
+        updateRemoveButtons();
+    }
+    
+    // Update remove button display status
+    function updateRemoveButtons() {
+        const fileRows = $('.summary-file-row');
+        if (fileRows.length <= 1) {
+            $('.remove-file-btn').hide();
+        } else {
+            $('.remove-file-btn').show();
+        }
+    }
+    
+    // Renumber files
+    function renumberFiles() {
+        $('.summary-file-row').each(function(index) {
+            $(this).find('label').html(`<i class="fas fa-file-excel me-1"></i>Summary File ${index + 1}${index === 0 ? ' *' : ''}`);
+            if (index === 0) {
+                $(this).find('.summary-file-input').prop('required', true);
+            } else {
+                $(this).find('.summary-file-input').prop('required', false);
+            }
+        });
+        fileCounter = $('.summary-file-row').length;
+    }
+    
+    // Update file list display and hidden fields
+    function updateFileList() {
+        const selectedFiles = [];
+        const fileListHtml = [];
+        
+        $('.summary-file-input').each(function() {
+            const file = this.files[0];
+            if (file) {
+                selectedFiles.push(file.name);
+                fileListHtml.push(`<li>${file.name} <small class="text-muted">(${(file.size / 1024 / 1024).toFixed(2)} MB)</small></li>`);
+            }
+        });
+        
+        // Update hidden field
+        $('#summary_files_input').val(selectedFiles.join(','));
+        
+        // Update display list
+        if (selectedFiles.length > 0) {
+            $('#file-list-summary').html(fileListHtml.join(''));
+            $('#selected-files-summary').show();
+        } else {
+            $('#selected-files-summary').hide();
+        }
+    }
+    
+    // Update individual file status display
+    function updateFileStatusDisplay($input) {
+        const file = $input[0].files[0];
+        const statusDiv = $input.siblings('.text-muted').find('small');
+        
+        if (file) {
+            const fileName = file.name;
+            const fileSize = (file.size / 1024 / 1024).toFixed(2); // MB
+            statusDiv.html(`Selected: ${fileName} (${fileSize} MB)`);
+            statusDiv.addClass('text-success');
+        } else {
+            statusDiv.html('Upload summary file (.xlsx or .xls)');
+            statusDiv.removeClass('text-success');
+        }
+    }
+
+    // File preview functionality for other types
+    $(document).on('change', 'input[type="file"]:not(.summary-file-input)', function() {
+        const file = this.files[0];
+        const fileLabel = $(this).closest('.card-body, .mb-3');
+        
+        if (file) {
+            const fileName = file.name;
+            const fileSize = (file.size / 1024 / 1024).toFixed(2); // MB
+            const statusDiv = fileLabel.find('.text-muted small');
+            statusDiv.html(`Selected: ${fileName} (${fileSize} MB)`);
+            statusDiv.addClass('text-success');
+        }
+    });
+
+    // Form submission validation
+    $('#uploadForm').submit(function(e) {
+        const processType = $('input[name="process_type"]:checked').val();
+        
+        if (processType === 'database') {
+            // Database processing: verify if summary files are uploaded
+            const fileInputs = $('.summary-file-input');
+            let hasFiles = false;
+            
+            fileInputs.each(function() {
+                if (this.files && this.files.length > 0) {
+                    hasFiles = true;
+                    return false; // Break out of loop
+                }
+            });
+            
+            if (!hasFiles) {
+                e.preventDefault();
+                alert('Please upload at least one summary file!');
+                return false;
+            }
+            
+            // Remove old hidden field logic as we now use file objects directly
+            $('#summary_files_input').remove();
+            $('#summary_files_list_input').remove();
+            
+            // Ensure all file inputs have name attribute set to "summary_files"
+            $('.summary-file-input').each(function() {
+                if (this.files && this.files.length > 0) {
+                    $(this).attr('name', 'summary_files');
+                }
+            });
+            
+        } else {
+            // Check required files for other types
+            const requiredFiles = $(this).find('input[type="file"][required]:not(.summary-file-input)');
+            let allFilesSelected = true;
+            
+            requiredFiles.each(function() {
+                if (!this.files || this.files.length === 0) {
+                    allFilesSelected = false;
+                    return false;
+                }
+            });
+            
+            if (!allFilesSelected) {
+                e.preventDefault();
+                alert('Please upload all required files!');
+                return false;
+            }
+        }
+    });
+});
+</script>
+
+<style>
+.process-flow-item {
+    padding: 1rem;
+    border-radius: 0.5rem;
+    background-color: #f8f9fa;
+}
+
+.file-upload-area {
+    border: 2px dashed #dee2e6;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    text-align: center;
+    transition: border-color 0.3s;
+}
+
+.file-upload-area:hover {
+    border-color: #007bff;
+}
+
+.border-success .file-upload-area {
+    border-color: #28a745 !important;
+}
+</style>
+{% endblock %} 

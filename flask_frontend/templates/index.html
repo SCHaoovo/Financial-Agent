@@ -1,0 +1,306 @@
+{% extends "base.html" %}
+
+{% block title %}Financial Reporting System - Intelligent Analysis Platform{% endblock %}
+
+{% block content %}
+<div class="hero-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold mb-4">Financial Data Intelligent Analysis Platform</h1>
+                <p class="lead mb-4">
+                    Leverage AI technology to automatically process financial statements, extract key information, and generate professional reports.
+                </p>
+                <div class="d-flex gap-3">
+                    <a href="{{ url_for('upload_files') }}" class="btn btn-light btn-lg">
+                        <i class="fas fa-upload me-2"></i>Start Processing
+                    </a>
+                    <!-- 暂时移除工作流功能
+                    <a href="{{ url_for('workflow') }}" class="btn btn-outline-light btn-lg">
+                        <i class="fas fa-cogs me-2"></i>Integrated Workflow
+                    </a>
+                    -->
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="text-center">
+                    <i class="fas fa-chart-pie text-white" style="font-size: 12rem; opacity: 0.3;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container my-5">
+    <!-- Feature Cards -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-6 col-lg-3">
+            <div class="card feature-card h-100">
+                <div class="card-body text-center">
+                    <div class="feature-icon text-primary">
+                        <i class="fas fa-file-upload"></i>
+                    </div>
+                    <h5 class="card-title">File Upload</h5>
+                    <p class="card-text">Support uploading various formats of financial statements, including PDF, Excel, and images.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6 col-lg-3">
+            <div class="card feature-card h-100">
+                <div class="card-body text-center">
+                    <div class="feature-icon text-success">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <h5 class="card-title">AI Processing</h5>
+                    <p class="card-text">Use advanced AI algorithms to automatically identify and extract key financial data.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6 col-lg-3">
+            <div class="card feature-card h-100">
+                <div class="card-body text-center">
+                    <div class="feature-icon text-warning">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h5 class="card-title">Visual Reports</h5>
+                    <p class="card-text">Generate beautiful data visualization charts and professional financial analysis reports.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6 col-lg-3">
+            <div class="card feature-card h-100">
+                <div class="card-body text-center">
+                    <div class="feature-icon text-info">
+                        <i class="fas fa-download"></i>
+                    </div>
+                    <h5 class="card-title">Export Results</h5>
+                    <p class="card-text">Export processed data in multiple formats, supporting Excel, PDF, and JSON outputs.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Processing Steps -->
+    <div class="row">
+        <div class="col-12">
+            <h2 class="text-center mb-4">How It Works</h2>
+            <div class="row g-4">
+                <div class="col-md-3">
+                    <div class="text-center">
+                        <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                            <h4 class="mb-0">1</h4>
+                        </div>
+                        <h5 class="mt-3">Upload Files</h5>
+                        <p class="text-muted">Upload your financial statement files</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="text-center">
+                        <div class="bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                            <h4 class="mb-0">2</h4>
+                        </div>
+                        <h5 class="mt-3">AI Processing</h5>
+                        <p class="text-muted">AI automatically extracts and analyzes data</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="text-center">
+                        <div class="bg-warning text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                            <h4 class="mb-0">3</h4>
+                        </div>
+                        <h5 class="mt-3">Generate Reports</h5>
+                        <p class="text-muted">Automatically generate professional reports</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="text-center">
+                        <div class="bg-info text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                            <h4 class="mb-0">4</h4>
+                        </div>
+                        <h5 class="mt-3">Download Results</h5>
+                        <p class="text-muted">Download processed results and reports</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-tachometer-alt me-2"></i>System Overview
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-3">
+                            <h3 class="text-primary">99.5%</h3>
+                            <p class="text-muted">Processing Accuracy</p>
+                        </div>
+                        <div class="col-md-3">
+                            <h3 class="text-success">< 30s</h3>
+                            <p class="text-muted">Average Processing Time</p>
+                        </div>
+                        <div class="col-md-3">
+                            <h3 class="text-warning">50+</h3>
+                            <p class="text-muted">Supported Formats</p>
+                        </div>
+                        <div class="col-md-3">
+                            <h3 class="text-info">24/7</h3>
+                            <p class="text-muted">Service Availability</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-rocket me-2"></i>Quick Start
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3 justify-content-center">
+                        <div class="col-md-6">
+                            <a href="{{ url_for('upload_files') }}" class="btn btn-outline-primary w-100 py-3">
+                                <i class="fas fa-upload d-block mb-2" style="font-size: 2rem;"></i>
+                                <strong>File Processing</strong>
+                                <small class="d-block text-muted">Upload and process individual files</small>
+                            </a>
+                        </div>
+                        <!-- 暂时移除工作流功能
+                        <div class="col-md-4">
+                            <a href="{{ url_for('workflow') }}" class="btn btn-outline-success w-100 py-3">
+                                <i class="fas fa-cogs d-block mb-2" style="font-size: 2rem;"></i>
+                                <strong>Integrated Workflow</strong>
+                                <small class="d-block text-muted">Complete end-to-end processing</small>
+                            </a>
+                        </div>
+                        -->
+                        <div class="col-md-6">
+                            <a href="{{ url_for('results') }}" class="btn btn-outline-info w-100 py-3">
+                                <i class="fas fa-chart-bar d-block mb-2" style="font-size: 2rem;"></i>
+                                <strong>View Results</strong>
+                                <small class="d-block text-muted">Browse historical processing results</small>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.hero-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 60vh;
+    display: flex;
+    align-items: center;
+}
+
+.feature-icon-large {
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+}
+
+.step-card {
+    padding: 2rem 1rem;
+    height: 100%;
+    transition: transform 0.3s;
+}
+
+.step-card:hover {
+    transform: translateY(-5px);
+}
+
+.step-number {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin: 0 auto;
+}
+
+.process-flow {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.card {
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
+
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+}
+
+@media (max-width: 768px) {
+    .process-flow {
+        justify-content: center;
+    }
+    
+    .display-4 {
+        font-size: 2.5rem;
+    }
+    
+    .hero-section {
+        min-height: 50vh;
+        padding: 3rem 0;
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // 平滑滚动到功能介绍
+    $('a[href="#features"]').click(function(e) {
+        e.preventDefault();
+        $('html, body').animate({
+            scrollTop: $('#features').offset().top - 80
+        }, 800);
+    });
+    
+    // 数字动画效果（可以添加实际的统计数据）
+    $('.fw-bold').each(function() {
+        $(this).addClass('animate__animated animate__fadeInUp');
+    });
+    
+    // 卡片悬停效果增强
+    $('.card').hover(
+        function() { $(this).addClass('shadow-lg'); },
+        function() { $(this).removeClass('shadow-lg'); }
+    );
+});
+</script>
+{% endblock %} 

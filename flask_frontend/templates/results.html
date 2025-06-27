@@ -1,0 +1,241 @@
+{% extends "base.html" %}
+
+{% block title %}Processing Results - Financial Reporting System{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <!-- Page Title -->
+        <div class="card mb-4">
+            <div class="card-header bg-success text-white">
+                <h4 class="mb-0">
+                    <i class="fas fa-check-circle me-2"></i>Processing Results
+                </h4>
+            </div>
+            <div class="card-body">
+                <p class="mb-0">Below are your file processing results. Click the download links to get the generated files.</p>
+            </div>
+        </div>
+
+        <!-- File List -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-folder-open me-2"></i>Generated Files
+                </h5>
+            </div>
+            <div class="card-body">
+                <div id="file-list-container">
+                    <div class="text-center">
+                        <div class="spinner-border" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2">Loading file list...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="mt-4 text-center">
+            <a href="{{ url_for('upload_files') }}" class="btn btn-primary me-2">
+                <i class="fas fa-plus me-1"></i>Process New Files
+            </a>
+            <a href="{{ url_for('index') }}" class="btn btn-secondary">
+                <i class="fas fa-home me-1"></i>Back to Home
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Load file list
+    loadFileList();
+    
+    function loadFileList() {
+        $.ajax({
+            url: '/api/list_files',
+            method: 'GET',
+            timeout: 10000
+        }).done(function(response) {
+            displayFileList(response);
+        }).fail(function(xhr, status, error) {
+            $('#file-list-container').html(`
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle me-1"></i>
+                    Failed to load file list: ${error}
+                </div>
+            `);
+        });
+    }
+    
+    function displayFileList(data) {
+        let html = '';
+        
+        // Display download files
+        if (data.download_files && data.download_files.length > 0) {
+            html += `
+                <div class="mb-4">
+                    <h6 class="text-success mb-3">
+                        <i class="fas fa-download me-1"></i>Downloadable Files (${data.download_files.length})
+                    </h6>
+                    <div class="row">
+            `;
+            
+            data.download_files.forEach(function(filename) {
+                const fileType = getFileType(filename);
+                const icon = getFileIcon(filename);
+                
+                html += `
+                    <div class="col-md-6 mb-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="card-title mb-1">
+                                            <i class="${icon} me-1"></i>${filename}
+                                        </h6>
+                                        <small class="text-muted">${fileType}</small>
+                                    </div>
+                                    <div>
+                                        <a href="/download/${filename}" class="btn btn-sm btn-success me-1">
+                                            <i class="fas fa-download"></i>
+                                        </a>
+                                        <button class="btn btn-sm btn-outline-danger" onclick="deleteFile('${filename}', 'download')">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += `
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Display uploaded files
+        if (data.uploaded_files && data.uploaded_files.length > 0) {
+            html += `
+                <div class="mb-4">
+                    <h6 class="text-info mb-3">
+                        <i class="fas fa-upload me-1"></i>Uploaded Files (${data.uploaded_files.length})
+                    </h6>
+                    <div class="row">
+            `;
+            
+            data.uploaded_files.forEach(function(filename) {
+                const fileType = getFileType(filename);
+                const icon = getFileIcon(filename);
+                
+                html += `
+                    <div class="col-md-6 mb-3">
+                        <div class="card border-info">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="card-title mb-1">
+                                            <i class="${icon} me-1"></i>${filename}
+                                        </h6>
+                                        <small class="text-muted">${fileType}</small>
+                                    </div>
+                                    <div>
+                                        <button class="btn btn-sm btn-outline-danger" onclick="deleteFile('${filename}', 'upload')">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += `
+                    </div>
+                </div>
+            `;
+        }
+        
+        if (!html) {
+            html = `
+                <div class="text-center text-muted">
+                    <i class="fas fa-folder-open fa-3x mb-3"></i>
+                    <p>No files available</p>
+                    <a href="${window.location.origin}/upload" class="btn btn-primary">
+                        <i class="fas fa-plus me-1"></i>Upload Files to Start Processing
+                    </a>
+                </div>
+            `;
+        }
+        
+        $('#file-list-container').html(html);
+    }
+    
+    function getFileType(filename) {
+        const ext = filename.split('.').pop().toLowerCase();
+        switch(ext) {
+            case 'xlsx':
+            case 'xls':
+                return 'Excel File';
+            case 'docx':
+                return 'Word Document';
+            case 'zip':
+                return 'Archive File';
+            case 'pdf':
+                return 'PDF Document';
+            default:
+                return 'Unknown Format';
+        }
+    }
+    
+    function getFileIcon(filename) {
+        const ext = filename.split('.').pop().toLowerCase();
+        switch(ext) {
+            case 'xlsx':
+            case 'xls':
+                return 'fas fa-file-excel text-success';
+            case 'docx':
+                return 'fas fa-file-word text-primary';
+            case 'zip':
+                return 'fas fa-file-archive text-warning';
+            case 'pdf':
+                return 'fas fa-file-pdf text-danger';
+            default:
+                return 'fas fa-file text-secondary';
+        }
+    }
+    
+    // Delete file
+    window.deleteFile = function(filename, type) {
+        if (confirm(`Are you sure you want to delete the file "${filename}"?`)) {
+            $.ajax({
+                url: '/api/delete_file',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    filename: filename,
+                    type: type
+                })
+            }).done(function(response) {
+                if (response.success) {
+                    // Reload file list
+                    loadFileList();
+                } else {
+                    alert('Delete failed: ' + response.message);
+                }
+            }).fail(function(xhr, status, error) {
+                alert('Delete failed: ' + error);
+            });
+        }
+    };
+});
+</script>
+{% endblock %} 

@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}Integrated Workflow - Financial Reporting System{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <!-- Page Title -->
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">
+                    <i class="fas fa-cogs me-2"></i>Integrated Workflow
+                </h4>
+            </div>
+            <div class="card-body">
+                <p class="mb-0">The integrated workflow will automatically execute the complete financial data processing pipeline, including data summary, database generation, visualization, and intelligent report generation.</p>
+            </div>
+        </div>
+
+        <!-- Workflow Description -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-info-circle me-2"></i>Workflow Description
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-check text-success me-1"></i>Processing Steps</h6>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-angle-right text-primary me-1"></i>Data Summary</li>
+                            <li><i class="fas fa-angle-right text-primary me-1"></i>Structured Database</li>
+                            <li><i class="fas fa-angle-right text-primary me-1"></i>Data Visualization</li>
+                            <li><i class="fas fa-angle-right text-primary me-1"></i>Intelligent Report Generation</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-clock text-info me-1"></i>Estimated Time</h6>
+                        <p class="text-muted">Approximately 5-10 minutes (depending on data volume)</p>
+                        
+                        <h6><i class="fas fa-file text-warning me-1"></i>Input Requirements</h6>
+                        <p class="text-muted">Requires PL and BS Excel files</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Start -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-rocket me-2"></i>Quick Start
+                </h5>
+            </div>
+            <div class="card-body text-center">
+                <p class="text-muted mb-4">
+                    Upload your PL and BS files, and the system will automatically complete all processing steps.
+                </p>
+                <a href="{{ url_for('upload_files') }}" class="btn btn-success btn-lg">
+                    <i class="fas fa-upload me-2"></i>Start Workflow
+                </a>
+            </div>
+        </div>
+
+        <!-- Back Link -->
+        <div class="mt-4 text-center">
+            <a href="{{ url_for('index') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-1"></i>Back to Home
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %} 

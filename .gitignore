@@ -86,7 +86,9 @@ htmlcov/
 *.jpg
 *.jpeg
 *.svg
+# Exclude generated HTML files but allow template files
 *.html
+!flask_frontend/templates/*.html
 
 # But keep example files
 !examples/*.xlsx

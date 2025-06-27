@@ -1,0 +1,852 @@
+{% extends "base.html" %}
+
+{% block title %}Processing - Financial Reporting System{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <!-- Processing Status Overview -->
+        <div class="card mb-4">
+            <div class="card-header bg-info text-white">
+                <h4 class="mb-0">
+                    <i class="fas fa-cogs me-2"></i>Financial Data Processing
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Entity:</strong> {{ entity }}</p>
+                        <p><strong>Financial Year:</strong> {{ financial_year }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>PL File:</strong> {{ pl_file }}</p>
+                        <p><strong>BS File:</strong> {{ bs_file }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Processing Steps Progress -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-tasks me-2"></i>Processing Progress
+                </h5>
+            </div>
+            <div class="card-body">
+                <!-- Data Summary Step -->
+                <div class="process-step mb-4" id="step-summary">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-1">
+                                <span class="status-indicator" id="status-summary"></span>
+                                <i class="fas fa-table me-1"></i>Data Summary
+                            </h6>
+                            <p class="text-muted mb-0" id="desc-summary">Integrate PL and BS data, generate monthly summary</p>
+                        </div>
+                        <div class="text-end">
+                            <div class="spinner-border text-primary d-none" role="status" id="spinner-summary">
+                                <span class="visually-hidden">Processing...</span>
+                            </div>
+                            <i class="fas fa-check-circle text-success fa-2x d-none" id="check-summary"></i>
+                            <i class="fas fa-times-circle text-danger fa-2x d-none" id="error-summary"></i>
+                        </div>
+                    </div>
+                    <div class="progress mt-2 d-none" id="progress-summary">
+                        <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+                    </div>
+                    <div class="result-section mt-3 d-none" id="result-summary">
+                        <div class="alert alert-success">
+                            <i class="fas fa-download me-1"></i>
+                            <a href="#" class="alert-link" id="download-summary">Download Summary File</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Structured Database Step -->
+                <div class="process-step mb-4 d-none" id="step-database">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-1">
+                                <span class="status-indicator" id="status-database"></span>
+                                <i class="fas fa-database me-1"></i>Structured Database
+                            </h6>
+                            <p class="text-muted mb-0" id="desc-database">Generate standardized Excel database file</p>
+                        </div>
+                        <div class="text-end">
+                            <div class="spinner-border text-success d-none" role="status" id="spinner-database">
+                                <span class="visually-hidden">Processing...</span>
+                            </div>
+                            <i class="fas fa-check-circle text-success fa-2x d-none" id="check-database"></i>
+                            <i class="fas fa-times-circle text-danger fa-2x d-none" id="error-database"></i>
+                        </div>
+                    </div>
+                    <div class="progress mt-2 d-none" id="progress-database">
+                        <div class="progress-bar bg-success" role="progressbar" style="width: 0%"></div>
+                    </div>
+                    <div class="result-section mt-3 d-none" id="result-database">
+                        <div class="alert alert-success">
+                            <i class="fas fa-download me-1"></i>
+                            <a href="#" class="alert-link" id="download-database">Download Database File</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Data Visualization Step -->
+                <div class="process-step mb-4 d-none" id="step-visualization">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-1">
+                                <span class="status-indicator" id="status-visualization"></span>
+                                <i class="fas fa-chart-bar me-1"></i>Data Visualization
+                            </h6>
+                            <p class="text-muted mb-0" id="desc-visualization">Generate financial charts and trend analysis</p>
+                        </div>
+                        <div class="text-end">
+                            <div class="spinner-border text-warning d-none" role="status" id="spinner-visualization">
+                                <span class="visually-hidden">Processing...</span>
+                            </div>
+                            <i class="fas fa-check-circle text-success fa-2x d-none" id="check-visualization"></i>
+                            <i class="fas fa-times-circle text-danger fa-2x d-none" id="error-visualization"></i>
+                        </div>
+                    </div>
+                    <div class="progress mt-2 d-none" id="progress-visualization">
+                        <div class="progress-bar bg-warning" role="progressbar" style="width: 0%"></div>
+                    </div>
+                    <div class="result-section mt-3 d-none" id="result-visualization">
+                        <div class="alert alert-success">
+                            <i class="fas fa-eye me-1"></i>
+                            <a href="#" class="alert-link" id="view-visualization">View Visualization Results</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Intelligent Reporting Step -->
+                <div class="process-step mb-4 d-none" id="step-reporting">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-1">
+                                <span class="status-indicator" id="status-reporting"></span>
+                                <i class="fas fa-file-alt me-1"></i>Intelligent Report Generation
+                            </h6>
+                            <p class="text-muted mb-0" id="desc-reporting">AI analysis and professional financial report generation</p>
+                        </div>
+                        <div class="text-end">
+                            <div class="spinner-border text-info d-none" role="status" id="spinner-reporting">
+                                <span class="visually-hidden">Processing...</span>
+                            </div>
+                            <i class="fas fa-check-circle text-success fa-2x d-none" id="check-reporting"></i>
+                            <i class="fas fa-times-circle text-danger fa-2x d-none" id="error-reporting"></i>
+                        </div>
+                    </div>
+                    <div class="progress mt-2 d-none" id="progress-reporting">
+                        <div class="progress-bar bg-info" role="progressbar" style="width: 0%"></div>
+                    </div>
+                    <div class="result-section mt-3 d-none" id="result-reporting">
+                        <div class="alert alert-success">
+                            <i class="fas fa-download me-1"></i>
+                            <a href="#" class="alert-link" id="download-reporting">Download Analysis Report</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Integrated Workflow Step -->
+                <div class="process-step mb-4 d-none" id="step-workflow">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-1">
+                                <span class="status-indicator" id="status-workflow"></span>
+                                <i class="fas fa-cogs me-1"></i>Integrated Workflow
+                            </h6>
+                            <p class="text-muted mb-0" id="desc-workflow">Execute complete end-to-end processing workflow</p>
+                        </div>
+                        <div class="text-end">
+                            <div class="spinner-border text-primary d-none" role="status" id="spinner-workflow">
+                                <span class="visually-hidden">Processing...</span>
+                            </div>
+                            <i class="fas fa-check-circle text-success fa-2x d-none" id="check-workflow"></i>
+                            <i class="fas fa-times-circle text-danger fa-2x d-none" id="error-workflow"></i>
+                        </div>
+                    </div>
+                    <div class="progress mt-2 d-none" id="progress-workflow">
+                        <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+                    </div>
+                    <div class="result-section mt-3 d-none" id="result-workflow">
+                        <div class="alert alert-success">
+                            <i class="fas fa-folder-open me-1"></i>
+                            <a href="#" class="alert-link" id="view-workflow">View All Results</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Log Output -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-terminal me-2"></i>Processing Log
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="bg-dark text-light p-3 rounded" style="height: 300px; overflow-y: auto; font-family: 'Courier New', monospace;">
+                    <div id="log-output">
+                        <div class="text-success">[INFO] Starting financial data processing...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="mt-4 text-center">
+            <a href="{{ url_for('upload_files') }}" class="btn btn-secondary me-2">
+                <i class="fas fa-arrow-left me-1"></i>Re-upload
+            </a>
+            <a href="{{ url_for('results') }}" class="btn btn-primary" id="view-results" style="display: none;">
+                <i class="fas fa-eye me-1"></i>View All Results
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Get processing parameters
+    const params = {
+        pl_file: '{{ pl_file if pl_file else "" }}',
+        bs_file: '{{ bs_file if bs_file else "" }}',
+        entity: '{{ entity if entity else "" }}',
+        financial_year: '{{ financial_year if financial_year else "" }}',
+        summary_files: '{{ summary_files if summary_files else "" }}',
+        database_file: '{{ database_file if database_file else "" }}',
+        process_type: '{{ process_type if process_type else "" }}'
+    };
+
+    // Add debug information
+    console.log('Processing parameters:', params);
+
+    // Log output function
+    function addLog(message, type = 'info') {
+        const logOutput = $('#log-output');
+        const timestamp = new Date().toLocaleTimeString();
+        const colorClass = {
+            'info': 'text-info',
+            'success': 'text-success',
+            'warning': 'text-warning',
+            'error': 'text-danger'
+        }[type] || 'text-light';
+        
+        logOutput.append(`<div class="${colorClass}">[${timestamp}] ${message}</div>`);
+        logOutput.scrollTop(logOutput[0].scrollHeight);
+    }
+
+    // Update step status
+    function updateStepStatus(step, status, progress = 0, message = '') {
+        const stepElement = $(`#step-${step}`);
+        const statusIndicator = $(`#status-${step}`);
+        const spinner = $(`#spinner-${step}`);
+        const checkIcon = $(`#check-${step}`);
+        const errorIcon = $(`#error-${step}`);
+        const progressBar = $(`#progress-${step} .progress-bar`);
+        const resultSection = $(`#result-${step}`);
+
+        // Clear previous status
+        statusIndicator.removeClass('status-processing status-success status-error status-waiting');
+        spinner.addClass('d-none');
+        checkIcon.addClass('d-none');
+        errorIcon.addClass('d-none');
+
+        switch(status) {
+            case 'waiting':
+                statusIndicator.addClass('status-waiting');
+                progressBar.css('width', '0%');
+                $(`#progress-${step}`).removeClass('d-none');
+                break;
+            case 'processing':
+                statusIndicator.addClass('status-processing');
+                spinner.removeClass('d-none');
+                progressBar.css('width', progress + '%');
+                $(`#progress-${step}`).removeClass('d-none');
+                break;
+            case 'success':
+                statusIndicator.addClass('status-success');
+                checkIcon.removeClass('d-none');
+                progressBar.css('width', '100%');
+                resultSection.removeClass('d-none');
+                break;
+            case 'error':
+                statusIndicator.addClass('status-error');
+                errorIcon.removeClass('d-none');
+                break;
+        }
+
+        if (message) {
+            $(`#desc-${step}`).text(message);
+        }
+    }
+
+    // Generic function to call backend API
+    function callBackendAPI(endpoint, step, data) {
+        addLog(`Starting ${step} interface call...`);
+        addLog(`Data passed: ${JSON.stringify(data)}`, 'info');
+        updateStepStatus(step, 'processing', 10);
+
+        // Use FormData instead of JSON
+        const formData = new FormData();
+        for (const key in data) {
+            if (data[key]) {
+                formData.append(key, data[key]);
+                addLog(`Adding parameter: ${key} = ${data[key]}`, 'info');
+            } else {
+                addLog(`Skipping empty parameter: ${key}`, 'warning');
+            }
+        }
+
+        return $.ajax({
+            url: endpoint,
+            method: 'POST',
+            processData: false,
+            contentType: false,
+            data: formData,
+            timeout: 900000, // 15 minutes timeout (increased from 5 minutes)
+            xhr: function() {
+                const xhr = new window.XMLHttpRequest();
+                // Upload progress monitoring can be added here
+                return xhr;
+            }
+        }).done(function(response) {
+            addLog(`${step} processing completed`, 'success');
+            updateStepStatus(step, 'success', 100);
+            
+            // Set download link or display results
+            if (response.download_url) {
+                // File download
+                $(`#download-${step}`).attr('href', response.download_url);
+                
+                // Show file type information
+                let fileTypeInfo = '';
+                if (response.file_type) {
+                    const fileTypeNames = {
+                        'xlsx': 'Excel File',
+                        'docx': 'Word Document',
+                        'zip': 'ZIP Archive',
+                        'bin': 'Binary Data File',
+                        'xls': 'Legacy Excel File'
+                    };
+                    fileTypeInfo = ` (${fileTypeNames[response.file_type] || response.file_type})`;
+                }
+                
+                // Choose appropriate icon
+                let fileIcon = 'fas fa-download';
+                if (response.file_type) {
+                    const fileIcons = {
+                        'xlsx': 'fas fa-file-excel',
+                        'docx': 'fas fa-file-word',
+                        'zip': 'fas fa-file-archive',
+                        'bin': 'fas fa-file',
+                        'xls': 'fas fa-file-excel'
+                    };
+                    fileIcon = fileIcons[response.file_type] || 'fas fa-download';
+                }
+                
+                // Update result display
+                $(`#result-${step}`).html(`
+                    <div class="alert alert-success">
+                        <i class="${fileIcon} me-1"></i>
+                        <a href="${response.download_url}" class="alert-link">Download ${step === 'summary' ? 'Summary' : step === 'database' ? 'Database' : step === 'visualization' ? 'Visualization' : step === 'reporting' ? 'Report' : 'Result'} File${fileTypeInfo}</a>
+                        ${response.file_type === 'bin' ? '<br><small class="text-warning">Note: File may be corrupted or in incorrect format</small>' : ''}
+                        ${response.original_path ? `<br><small class="text-muted">Source file: ${response.original_path}</small>` : ''}
+                    </div>
+                `).removeClass('d-none');
+                
+            } else if (response.result && step === 'visualization') {
+                // Visualization may return JSON results instead of files
+                $(`#result-${step}`).html(`
+                    <div class="alert alert-info">
+                        <i class="fas fa-chart-bar me-1"></i>
+                        Visualization processing completed
+                        <br><small>Result: ${JSON.stringify(response.result)}</small>
+                    </div>
+                `).removeClass('d-none');
+            } else if (response.result) {
+                // Other types of JSON results
+                $(`#result-${step}`).html(`
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Processing completed
+                        <br><small>Result: ${JSON.stringify(response.result)}</small>
+                    </div>
+                `).removeClass('d-none');
+            } else {
+                // No download link or result, show basic completion info
+                $(`#result-${step}`).html(`
+                    <div class="alert alert-success">
+                        <i class="fas fa-check me-1"></i>
+                        ${step === 'summary' ? 'Data Summary' : step === 'database' ? 'Database Generation' : step === 'visualization' ? 'Visualization Generation' : step === 'reporting' ? 'Report Generation' : 'Workflow Execution'} Completed
+                    </div>
+                `).removeClass('d-none');
+            }
+            
+            return response;
+        }).fail(function(xhr, status, error) {
+            let errorMsg;
+            if (status === 'timeout') {
+                errorMsg = 'Processing timeout, please try again later';
+            } else if (xhr.responseJSON && xhr.responseJSON.message) {
+                errorMsg = xhr.responseJSON.message;
+            } else if (xhr.responseText) {
+                try {
+                    const errorResponse = JSON.parse(xhr.responseText);
+                    errorMsg = errorResponse.message || errorResponse.error || 'Unknown error occurred';
+                } catch (e) {
+                    errorMsg = xhr.responseText.length > 100 ? xhr.responseText.substring(0, 100) + '...' : xhr.responseText;
+                }
+            } else {
+                errorMsg = error || 'Network error occurred';
+            }
+            addLog(`${step} processing failed: ${errorMsg}`, 'error');
+            updateStepStatus(step, 'error', 0, 'Processing failed');
+            throw new Error(errorMsg);
+        });
+    }
+
+    // Process data summary
+    function processSummary() {
+        const endpoint = '/api/generate_summary';
+        const data = {
+            pl_file: params.pl_file,
+            bs_file: params.bs_file,
+            entity: params.entity,
+            financial_year: params.financial_year
+        };
+        return callBackendAPI(endpoint, 'summary', data);
+    }
+
+    // Process structured database
+    function processDatabase() {
+        $('#step-database').removeClass('d-none');
+        const endpoint = '/api/generate_database';
+        const data = {
+            summary_files: params.summary_files,
+            entity: params.entity,
+            financial_year: params.financial_year
+        };
+        return callBackendAPI(endpoint, 'database', data);
+    }
+
+    // Process data visualization
+    function processVisualization() {
+        $('#step-visualization').removeClass('d-none');
+        const endpoint = '/api/generate_visualization';
+        const data = {
+            database_file: params.database_file,
+            entity: params.entity,
+            financial_year: params.financial_year
+        };
+        return callBackendAPI(endpoint, 'visualization', data);
+    }
+
+    // Process intelligent reporting
+    function processReporting() {
+        $('#step-reporting').removeClass('d-none');
+        const endpoint = '/api/generate_reporting';
+        const data = {
+            database_file: params.database_file,
+            entity: params.entity,
+            financial_year: params.financial_year
+        };
+        return callBackendAPI(endpoint, 'reporting', data);
+    }
+
+    // Process integrated workflow
+    function processWorkflow() {
+        $('#step-workflow').removeClass('d-none');
+        const endpoint = '/api/execute_workflow';
+        const data = {
+            pl_file: params.pl_file,
+            bs_file: params.bs_file,
+            entity: params.entity,
+            financial_year: params.financial_year
+        };
+        
+        // 创建FormData
+        const formData = new FormData();
+        for (const key in data) {
+            if (data[key]) {
+                formData.append(key, data[key]);
+            }
+        }
+        
+        // 启动工作流并获取task_id
+        return $.ajax({
+            url: endpoint,
+            method: 'POST',
+            processData: false,
+            contentType: false,
+            data: formData,
+            timeout: 30000, // 30秒启动超时
+        }).then(function(response) {
+            if (response.task_id) {
+                addLog('工作流已启动，任务ID: ' + response.task_id, 'info');
+                // 开始轮询任务状态
+                return pollWorkflowStatus(response.task_id);
+            } else {
+                throw new Error('未获取到任务ID');
+            }
+        }).fail(function(xhr, status, error) {
+            let errorMsg;
+            if (status === 'timeout') {
+                errorMsg = '启动工作流超时，请检查网络连接';
+            } else if (xhr.responseJSON && xhr.responseJSON.message) {
+                errorMsg = xhr.responseJSON.message;
+            } else {
+                errorMsg = error || '启动工作流失败';
+            }
+            addLog('工作流启动失败: ' + errorMsg, 'error');
+            throw new Error(errorMsg);
+        });
+    }
+    
+    // 轮询工作流状态
+    function pollWorkflowStatus(taskId) {
+        return new Promise((resolve, reject) => {
+            let pollCount = 0;
+            const maxPolls = 300; // 最多轮询5分钟 (300 * 1秒)
+            const pollInterval = 1000; // 每秒轮询一次
+            
+            const poll = () => {
+                pollCount++;
+                
+                $.ajax({
+                    url: '/api/workflow_status/' + taskId,
+                    method: 'GET',
+                    timeout: 10000
+                }).then(function(response) {
+                    addLog('任务状态: ' + response.status + ' - ' + (response.progress || ''), 'info');
+                    
+                    // 根据进度更新各步骤状态
+                    updateWorkflowStepStatus(response.progress);
+                    
+                    if (response.status === 'completed') {
+                        // 任务完成
+                        updateStepStatus('workflow', 'success', 100);
+                        updateStepStatus('summary', 'success', 100, '汇总表生成完成');
+                        updateStepStatus('database', 'success', 100, '数据库生成完成'); 
+                        updateStepStatus('visualization', 'success', 100, '图表生成完成');
+                        updateStepStatus('reporting', 'success', 100, '报告生成完成');
+                        addLog('工作流执行完成!', 'success');
+                        
+                        // 显示结果
+                        if (response.result) {
+                            displayWorkflowResults(response.result);
+                        }
+                        resolve(response);
+                        
+                    } else if (response.status === 'failed') {
+                        // 任务失败
+                        updateStepStatus('workflow', 'error', 0, '执行失败');
+                        const errorMsg = response.error || '工作流执行失败';
+                        addLog('工作流执行失败: ' + errorMsg, 'error');
+                        reject(new Error(errorMsg));
+                        
+                    } else if (response.status === 'processing') {
+                        // 任务进行中，解析进度
+                        const progress = parseWorkflowProgress(response.progress);
+                        updateStepStatus('workflow', 'processing', progress);
+                        
+                        // 继续轮询
+                        if (pollCount < maxPolls) {
+                            setTimeout(poll, pollInterval);
+                        } else {
+                            updateStepStatus('workflow', 'error', 0, '执行超时');
+                            addLog('工作流执行超时', 'error');
+                            reject(new Error('工作流执行超时'));
+                        }
+                        
+                    } else {
+                        // 其他状态 (pending等)，继续轮询
+                        updateStepStatus('workflow', 'processing', 10);
+                        
+                        if (pollCount < maxPolls) {
+                            setTimeout(poll, pollInterval);
+                        } else {
+                            updateStepStatus('workflow', 'error', 0, '执行超时');
+                            addLog('工作流执行超时', 'error');
+                            reject(new Error('工作流执行超时'));
+                        }
+                    }
+                }).fail(function(xhr, status, error) {
+                    if (pollCount < maxPolls && status !== 'timeout') {
+                        // 网络错误，继续重试
+                        setTimeout(poll, pollInterval);
+                    } else {
+                        updateStepStatus('workflow', 'error', 0, '网络错误');
+                        addLog('获取工作流状态失败: ' + (error || '网络错误'), 'error');
+                        reject(new Error('获取工作流状态失败'));
+                    }
+                });
+            };
+            
+            // 开始轮询
+            poll();
+        });
+    }
+    
+    // 解析工作流进度
+    function parseWorkflowProgress(progressText) {
+        if (!progressText) return 10;
+        
+        // 根据步骤文本估算进度
+        if (progressText.includes('步骤1/4')) return 25;
+        if (progressText.includes('步骤2/4')) return 50;
+        if (progressText.includes('步骤3/4')) return 75;
+        if (progressText.includes('步骤4/4')) return 90;
+        if (progressText.includes('完成')) return 100;
+        
+        return 30; // 默认进度
+    }
+    
+    // 根据后端进度更新工作流各步骤状态
+    function updateWorkflowStepStatus(progressText) {
+        if (!progressText) return;
+        
+        if (progressText.includes('步骤1/4')) {
+            updateStepStatus('summary', 'processing', 50, '正在生成汇总表');
+            updateStepStatus('database', 'waiting', 0, '等待开始');
+            updateStepStatus('visualization', 'waiting', 0, '等待开始');
+            updateStepStatus('reporting', 'waiting', 0, '等待开始');
+        } else if (progressText.includes('步骤2/4')) {
+            updateStepStatus('summary', 'success', 100, '汇总表生成完成');
+            updateStepStatus('database', 'processing', 50, '正在生成数据库');
+            updateStepStatus('visualization', 'waiting', 0, '等待开始');
+            updateStepStatus('reporting', 'waiting', 0, '等待开始');
+        } else if (progressText.includes('步骤3/4')) {
+            updateStepStatus('summary', 'success', 100, '汇总表生成完成');
+            updateStepStatus('database', 'success', 100, '数据库生成完成');
+            updateStepStatus('visualization', 'processing', 50, '正在生成图表');
+            updateStepStatus('reporting', 'waiting', 0, '等待开始');
+        } else if (progressText.includes('步骤4/4')) {
+            updateStepStatus('summary', 'success', 100, '汇总表生成完成');
+            updateStepStatus('database', 'success', 100, '数据库生成完成');
+            updateStepStatus('visualization', 'success', 100, '图表生成完成');
+            updateStepStatus('reporting', 'processing', 50, '正在生成报告');
+        } else if (progressText.includes('完成')) {
+            updateStepStatus('summary', 'success', 100, '汇总表生成完成');
+            updateStepStatus('database', 'success', 100, '数据库生成完成');
+            updateStepStatus('visualization', 'success', 100, '图表生成完成');
+            updateStepStatus('reporting', 'success', 100, '报告生成完成');
+        }
+    }
+    
+    // 显示工作流结果
+    function displayWorkflowResults(result) {
+        let resultHtml = '<div class="alert alert-success"><h6><i class="fas fa-check-circle me-1"></i>工作流执行完成</h6>';
+        
+        if (result.summary_files && result.summary_files.length > 0) {
+            resultHtml += '<p><strong>汇总表文件:</strong></p><ul>';
+            result.summary_files.forEach(file => {
+                resultHtml += `<li><a href="/download/${encodeURIComponent(file)}" class="text-decoration-none"><i class="fas fa-file-excel me-1"></i>${file}</a></li>`;
+            });
+            resultHtml += '</ul>';
+        }
+        
+        if (result.database_file) {
+            resultHtml += `<p><strong>财务数据库:</strong> <a href="/download/${encodeURIComponent(result.database_file)}" class="text-decoration-none"><i class="fas fa-database me-1"></i>${result.database_file}</a></p>`;
+        }
+        
+        if (result.visualization_file) {
+            resultHtml += `<p><strong>可视化图表:</strong> <a href="/download/${encodeURIComponent(result.visualization_file)}" class="text-decoration-none"><i class="fas fa-chart-bar me-1"></i>${result.visualization_file}</a></p>`;
+        }
+        
+        if (result.report_file) {
+            resultHtml += `<p><strong>分析报告:</strong> <a href="/download/${encodeURIComponent(result.report_file)}" class="text-decoration-none"><i class="fas fa-file-word me-1"></i>${result.report_file}</a></p>`;
+        }
+        
+        resultHtml += '</div>';
+        
+        $('#result-workflow').html(resultHtml).removeClass('d-none');
+    }
+
+    // Simulate progress update
+    function simulateProgress(step, duration = 30000) {
+        let progress = 10;
+        const interval = 1000; // Update every second
+        const increment = 80 / (duration / interval); // From 10% to 90%
+
+        const timer = setInterval(function() {
+            progress += increment;
+            if (progress >= 90) {
+                clearInterval(timer);
+                progress = 90;
+            }
+            updateStepStatus(step, 'processing', progress);
+        }, interval);
+
+        return timer;
+    }
+
+    // Start processing workflow
+    addLog('Initializing processing workflow...');
+    addLog(`Processing type: ${params.process_type}`, 'info');
+    
+    // First hide all steps
+    $('#step-summary').addClass('d-none');
+    $('#step-database').addClass('d-none');
+    $('#step-visualization').addClass('d-none');
+    $('#step-reporting').addClass('d-none');
+    $('#step-workflow').addClass('d-none');
+    
+    // Start processing
+    let currentPromise = Promise.resolve();
+    
+    // Decide which interface to call based on processing type
+    switch(params.process_type) {
+        case 'summary':
+            addLog('Starting data summary processing...', 'info');
+            // Only show summary step
+            $('#step-summary').removeClass('d-none').show();
+            currentPromise = currentPromise.then(() => {
+                const timer = simulateProgress('summary', 60000); // Increased from 30s to 60s
+                return processSummary().then(response => {
+                    clearInterval(timer);
+                    return response;
+                });
+            });
+            break;
+            
+        case 'database':
+            addLog('Starting database generation processing...', 'info');
+            // Only show database step
+            $('#step-database').removeClass('d-none').show();
+            currentPromise = currentPromise.then(() => {
+                const timer = simulateProgress('database', 60000); // Increased from 30s to 60s
+                return processDatabase().then(response => {
+                    clearInterval(timer);
+                    return response;
+                });
+            });
+            break;
+            
+        case 'visualization':
+            addLog('Starting visualization generation processing...', 'info');
+            // Only show visualization step
+            $('#step-visualization').removeClass('d-none').show();
+            currentPromise = currentPromise.then(() => {
+                const timer = simulateProgress('visualization', 60000); // Increased from 30s to 60s
+                return processVisualization().then(response => {
+                    clearInterval(timer);
+                    return response;
+                });
+            });
+            break;
+            
+        case 'reporting':
+            addLog('Starting report generation processing...', 'info');
+            // Only show reporting step
+            $('#step-reporting').removeClass('d-none').show();
+            currentPromise = currentPromise.then(() => {
+                const timer = simulateProgress('reporting', 60000); // Increased from 30s to 60s
+                return processReporting().then(response => {
+                    clearInterval(timer);
+                    return response;
+                });
+            });
+            break;
+            
+        /* 暂时移除工作流功能
+        case 'workflow':
+            addLog('Starting workflow execution processing...', 'info');
+            // Show all steps for workflow
+            $('#step-summary').removeClass('d-none').show();
+            $('#step-database').removeClass('d-none').show();
+            $('#step-visualization').removeClass('d-none').show();
+            $('#step-reporting').removeClass('d-none').show();
+            $('#step-workflow').removeClass('d-none').show();
+            
+            // 初始化所有步骤状态
+            updateStepStatus('summary', 'waiting', 0, '等待开始');
+            updateStepStatus('database', 'waiting', 0, '等待开始'); 
+            updateStepStatus('visualization', 'waiting', 0, '等待开始');
+            updateStepStatus('reporting', 'waiting', 0, '等待开始');
+            updateStepStatus('workflow', 'processing', 10, '启动工作流');
+            
+            currentPromise = currentPromise.then(() => {
+                return processWorkflow().then(response => {
+                    // 工作流完成后更新所有步骤状态
+                    updateStepStatus('summary', 'success', 100, '汇总表生成完成');
+                    updateStepStatus('database', 'success', 100, '数据库生成完成'); 
+                    updateStepStatus('visualization', 'success', 100, '图表生成完成');
+                    updateStepStatus('reporting', 'success', 100, '报告生成完成');
+                    updateStepStatus('workflow', 'success', 100, '工作流执行完成');
+                    return response;
+                });
+            });
+            break;
+        */
+            
+        default:
+            addLog(`Unknown processing type: ${params.process_type}`, 'error');
+            return;
+    }
+
+    currentPromise.then(() => {
+        addLog('All processing steps completed!', 'success');
+        $('#view-results').show();
+    }).catch(error => {
+        addLog('Error occurred during processing: ' + (error.message || error), 'error');
+    });
+});
+</script>
+
+<style>
+.process-flow-item {
+    padding: 1rem;
+    border-radius: 0.5rem;
+    background-color: #f8f9fa;
+}
+
+.status-indicator {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 8px;
+}
+
+.status-waiting {
+    background-color: #6c757d;
+    border: 2px solid #adb5bd;
+}
+
+.status-processing {
+    background-color: #007bff;
+    animation: pulse 1.5s ease-in-out infinite alternate;
+}
+
+.status-success {
+    background-color: #28a745;
+}
+
+.status-error {
+    background-color: #dc3545;
+}
+
+@keyframes pulse {
+    from {
+        opacity: 0.5;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.process-step {
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 1rem;
+    background-color: #fff;
+}
+</style>
+{% endblock %} 
