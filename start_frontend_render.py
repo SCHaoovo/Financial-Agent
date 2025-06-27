@@ -43,18 +43,39 @@ def main():
     # 确保目录存在
     ensure_render_directories()
     
-    # 切换到 flask_frontend 目录
-    sys.path.insert(0, 'flask_frontend')
-    os.chdir('flask_frontend')
+    # 获取当前工作目录和flask_frontend的绝对路径
+    current_dir = os.getcwd()
+    flask_frontend_dir = os.path.join(current_dir, 'flask_frontend')
     
-    # 导入并启动 Flask 应用
-    from app import app
+    print(f"Current directory: {current_dir}")
+    print(f"Flask frontend directory: {flask_frontend_dir}")
     
-    app.run(
-        host=host,
-        port=port,
-        debug=False
-    )
+    # 确保flask_frontend目录存在
+    if not os.path.exists(flask_frontend_dir):
+        print(f"❌ Flask frontend directory not found: {flask_frontend_dir}")
+        sys.exit(1)
+    
+    # 将flask_frontend目录添加到Python路径
+    sys.path.insert(0, flask_frontend_dir)
+    
+    # 切换到flask_frontend目录
+    os.chdir(flask_frontend_dir)
+    
+    try:
+        # 导入并启动 Flask 应用
+        from app import app
+        print("✅ Successfully imported Flask app")
+        
+        app.run(
+            host=host,
+            port=port,
+            debug=False
+        )
+    except ImportError as e:
+        print(f"❌ Failed to import app: {e}")
+        print(f"Current working directory: {os.getcwd()}")
+        print(f"Files in current directory: {os.listdir('.')}")
+        sys.exit(1)
 
 if __name__ == "__main__":
     main() 

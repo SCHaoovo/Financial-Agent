@@ -3,6 +3,7 @@
 """
 
 import os
+import sys
 import requests
 from flask import Flask, render_template, request, flash, redirect, url_for, send_file, jsonify, send_from_directory
 from flask_cors import CORS
@@ -12,7 +13,17 @@ import shutil
 from datetime import datetime
 import time
 from pathlib import Path
-from src.config import get_settings
+
+# 修复导入路径问题 - 适配Render环境
+try:
+    from src.config import get_settings
+except ImportError:
+    # 如果直接导入失败，尝试添加上级目录到路径
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    parent_dir = os.path.dirname(current_dir)
+    if parent_dir not in sys.path:
+        sys.path.insert(0, parent_dir)
+    from src.config import get_settings
 
 # 配置日志
 logging.basicConfig(level=logging.INFO)
