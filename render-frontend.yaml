@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: financial-frontend
+    env: python
+    region: oregon
+    plan: starter
+    buildCommand: pip install -r flask_frontend/requirements.txt
+    startCommand: python start_frontend_render.py
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: BACKEND_URL
+        value: https://financial-backend.onrender.com  # 替换为你的后端 URL
+      - key: FLASK_ENV
+        value: production 

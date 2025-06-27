@@ -1,0 +1,187 @@
+# Financial Reporting Agent .gitignore
+
+# Python virtual environments
+venv/
+env/
+.venv/
+.env/
+
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Distribution/packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Environment variable files - IMPORTANT for security
+.env
+.env.local
+.env.production
+.env.staging
+
+# IDE configurations
+.idea/
+.vscode/
+*.swp
+*.swo
+.project
+.pydevproject
+.settings/
+
+# Data files - exclude input and processed data, but keep directory structure
+data/input/*
+data/processed/*
+!data/input/.gitkeep
+!data/processed/.gitkeep
+
+# Flask frontend uploads and downloads
+flask_frontend/uploads/*
+flask_frontend/downloads/*
+!flask_frontend/uploads/.gitkeep
+!flask_frontend/downloads/.gitkeep
+
+# Root level uploads and downloads (for consistency)
+uploads/*
+downloads/*
+!uploads/.gitkeep
+!downloads/.gitkeep
+
+# Log files
+*.log
+logs/
+*.log.*
+
+# Temporary files
+.DS_Store
+Thumbs.db
+.coverage
+htmlcov/
+.pytest_cache/
+.hypothesis/
+
+# Generated reports and charts
+*.xlsx
+*.xls
+*.pdf
+*.docx
+*.png
+*.jpg
+*.jpeg
+*.svg
+*.html
+
+# But keep example files
+!examples/*.xlsx
+!examples/*.pdf
+!examples/*.png
+
+# Database files (if any)
+*.db
+*.sqlite
+*.sqlite3
+
+# Backup files
+*.bak
+*.backup
+*~
+
+# API keys and secrets (additional security)
+secrets.json
+config.json
+*.key
+*.pem
+*.crt
+
+# Testing files
+.tox/
+.coverage.*
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
+
+# SageMath parsed files
+*.sage.py
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# pytype static type analyzer
+.pytype/
+
+# Render deployment files (optional - can be tracked)
+# Uncomment if you don't want to track these:
+# render-backend.yaml
+# render-frontend.yaml
+
+# Windows specific
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# macOS specific
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+._*
+
+# Linux specific
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*

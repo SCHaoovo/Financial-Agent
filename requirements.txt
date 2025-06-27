@@ -1,0 +1,41 @@
+# Financial Reporting Agent Dependencies
+
+# API Framework
+fastapi>=0.103.1
+uvicorn>=0.23.2
+pydantic>=2.4.2
+pydantic-settings>=2.0.3
+python-multipart>=0.0.6
+
+# Data Processing
+pandas>=2.1.0
+numpy>=1.25.2
+openpyxl>=3.1.2
+xlrd>=2.0.1
+
+# Visualization
+matplotlib>=3.8.0
+seaborn>=0.12.2
+plotly>=5.16.1
+kaleido>=0.2.1  # For static image export with plotly
+
+# Reporting
+jinja2>=3.1.2
+python-docx>=0.8.11
+pdfkit>=1.0.0
+weasyprint>=60.1
+
+# LLM Integration
+anthropic>=0.5.0
+httpx>=0.24.1
+
+# Utilities
+python-dotenv>=1.0.0
+loguru>=0.7.0 
+openai~=1.86.0
+backoff~=2.2.1
+
+# Fronted
+requests~=2.32.4
+flask~=3.1.1
+werkzeug~=3.1.3
