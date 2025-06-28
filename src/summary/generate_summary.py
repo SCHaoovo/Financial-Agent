@@ -1,19 +1,13 @@
 """
 财务数据汇总模块 - 使用OpenAI API处理PL和BS数据
 """
-
-import os
 import logging
 import time
-import random
 import backoff
-import json
-
 from dotenv import load_dotenv
 from openai import OpenAI
 from openai import APIError, RateLimitError
 from typing import Optional
-
 from src.config import get_settings
 
 # 设置日志
@@ -34,7 +28,7 @@ settings = get_settings()
 @backoff.on_exception(
     backoff.expo,
     (RateLimitError, APIError),
-    max_tries=5,
+    max_tries=3,
     factor=2,
     jitter=backoff.full_jitter,
     on_backoff=lambda details: logger.warning(
@@ -77,19 +71,19 @@ def generate_summary(
         
         # 上传文件并获取file_id，使用指数退避
         try:
-            # 使用指数退避上传第一个文件 - 使用上下文管理器确保文件正确关闭
+            logger.info("步骤1: 开始上传文件")
+            # 上传PL文件
             with open(pl_file_path, "rb") as pl_file:
+                time.sleep(2)  # 避免连续请求
                 resp1 = api_request_with_backoff(
                     client.files.create,
                     file=pl_file,
                     purpose="assistants"
                 )
             
-            # 添加短暂延迟，避免连续请求
-            time.sleep(1.5)
-            
-            # 使用指数退避上传第二个文件 - 使用上下文管理器确保文件正确关闭
+            # 上传BS文件
             with open(bs_file_path, "rb") as bs_file:
+                time.sleep(2)
                 resp2 = api_request_with_backoff(
                     client.files.create,
                     file=bs_file,
@@ -98,218 +92,32 @@ def generate_summary(
             
             file_ids = [resp1.id, resp2.id]
             logger.info(f"文件上传成功，获取到file_ids: {file_ids}")
+            
+            # 上传完成后等待，避免立即进行AI处理
+            logger.info("步骤1完成，等待3秒后进行AI处理...")
+            time.sleep(3)
+            
         except Exception as e:
             logger.error(f"文件上传失败: {str(e)}")
             raise
 
-        # 构建Code Interpreter请求，使用指数退避
+        # 构建Code Interpreter请求，不使用重试机制
         try:
-            response = api_request_with_backoff(
-                client.responses.create,
+            logger.info("步骤2: 开始AI处理")
+            response = client.responses.create(
                 model="gpt-4o",
                 instructions=f"""
 你是一个精通金融数据分析的工程师。我上传了两个Excel文件，分别是{entity}公司{financial_year}年的PL表和BS表。请你完成以下任务：
 
 1. 使用Pandas库读取这两个文件。
 PL的Schema中Column是月份，比如January，February等等，Row是字段，比如：
-Account Name
-Income
-Contract Revenue (Stage 1)
-Contract Revenue (adj) - Stage 1
-Contract Revenue (allocation) - Stage 1
-Contract Revenue - Rebate (Stage 1)
-Contract Revenue (Stage 2)
-Contract Revenue (adj) - Stage 2
-Contract Revenue (allocation) - Stage 2
-Contract Revenue - Rebate (Stage 2)
 Total Income
 Cost Of Sales
-2b - Estate signage/Identity/Logo
-2q Local Sales Agent Commission
-3a Roadworks and Drainage
-3e Sewer Pump Station
-3f Water Main Extention
-3g Electrical
-3h Telecommunications
-3j Landscaping
-3n Demolition
-3r Construction spare 2
-4a Town Planning
-4b Urban Design
-4c Engineering
-4d Survey
-4i Other Consultants
-4j Drainage Engineer
-4k Flora & Fauna
-4m Arborist
-4n Landscaping consultant
-4p Permit Fees (council and authorities)
-4v Geotechnical
-5a Authjority fees & charges
-5b Sewarage & Water
-6d Council fees and charges
-7a Council rates
-7c Water Rates
-8a Settlement large parcel
-8b Admin and settlement of lot
-Common Cost - Transfer/ Deferral
-Stamp Duty & Land Registry Fee
-Total Cost Of Sales
-Gross Profit
-Expenses
-General & Administrative Exp
-ASIC
-Bank Charges
-Accounting Fees
-Management Fee
-Director Fee
-Professional fee
-Marketing
-Entertainment - Non Deductible
-Local - Travel & Accomodation
-Council Rates and Charges
-Electricity
-Insurance
-Land Tax
-Total General & Administrative Exp
-Total Expenses
-Operating Profit
-Other Income
-Interest Income
-Other Income
-Other Income - Reimbursement from Authority
-Rental income
-Total Other Income
-Other Expenses
-Interest expense (unit holders)
-Interest Expense - NAB Loan (7481)
-Interest Expense - NAB OD (5239)
-Interest Expense - NAB Loan (9177)
-Interest Expense - NAB Loan (9538)
-Interest expense (director / friendly loan)
-Interest Expense - NAB Loan (1047)
-Total Other Expenses
-Net Profit/(Loss)
+Net Profit/(Loss)等，具体参照上传的PL表文件
 对于BS表来说，Column也是月份，Row的字段为：
-Account Name
-Assets
-Current Assets
 Cash On Hand
-ANZ CMA (53789)
-NAB Term Deposit (5014)
-Sales Clearing Account
-Total Cash On Hand
-Other receivables
-Formation Expenses
-Company Incorporation
-Amortisation of formation cost
-Total Formation Expenses
-Loan to Others
-Loan to Waranu
-Land
-234 Lillico Road, Warragul
-Land at Cost - PP $4.5M
-Stamp Duty
-Land Registry Fee
-Authority/Statutory Fees
-Construction Works
-Professional Fees
-Legal Fees
-Landscape
-Rates and Taxes
-Arborist
-Land - Transfer to Cost of Sales
-Transfer to Cost of Sales
-Total 234 Lillico Road, Warragul
-230 Lillico Road, Warragul
-Land at Cost - PP $2.65M
-Total Land
-Stage 1 Development Costs
-Construction Costs - Civil Works (S1)
-Professional Fees (S1)
-Statutory Authority Fee (S1)
-Legal Costs (S1)
-Transfer to Cost of Sale (S1)
-Total Stage 1 Development Costs
-Stage 2 Development Costs
-Construction Costs - Civil Works (S2)
-Professional Fees (S2)
-Statutory Authority Fees (S2)
-Rates and Taxes (S2)
-Legal Costs (S2)
-Transfer to Cost of Sale (S2)
-Total Stage 2 Development Costs
-Stage 3 Development Costs
-Construction Costs - Civil Works (S3)
-Professional Fees (S3)
-Statutory Authority Fees (S3)
-Legal Costs (S3)
-Transfer to Cost of Sale (S3)
-Total Stage 3 Development Costs
-Stage 4 Development Costs
-Construction Costs - Civil Works (S4)
-Professional Fees (S4)
-Statutory Authority Fees (S4)
-Legal Costs (S4)
-Total Stage 4 Development Costs
-Stage 5 Development Costs
-Professional Fees (S5)
-Total Stage 5 Development Costs
-Inventories
-Sub-division Land Lots
-Total Inventories
-Total Assets
-Liabilities
-Current Liabilities
-Trade Creditors
-Other Payables
-Bond/deposit received (payable)
-Total Current Liabilities
-GST Liabilities
-GST Collected
-GST Paid
-Nett GST
-Total GST Liabilities
-Payroll Liabilities
-PAYG Withholding Payable
-Total Payroll Liabilities
-Long Term Liabilities
-Loan from L Track
-Loan from Khor Gok Hong
-Loan from Joshua
-Loan from Peh Family
 Total Long Term Liabilities
-Bank Loan
-NAB Overdraft
-NAB Construction Loan (9538)
-NAB Business Markets Loan (1047)
-Total Liabilities
-Net Assets
-Equity
-Unitholders Equity
-Unitholding - Janeliza
-Unitholding - Eastgate
-Unitholding - Aldinga FC
-Unitholding - Quadrant
-Unitholding - Chuan Jun Yeap
-Unitholding - Nai Yan Yeap
-Unitholding - Sky East
-Unitholding - Epiros
-Unitholding - Sau Bing Yeap
-Unitholding - G&J Avon
-Unitholding - Plenti Corp
-Unitholding - Apreg Pty Ltd
-Unitholding - Nancy Ang
-Unitholding - JY for Wei Yeap
-Unitholding - Unicol Pty Ltd
-Unitholding - Amanda Fung
-Unitholding - Nicholas Fung
-Distribution/Capital Return to unitholder
-Unit Premium
-Total Unitholders Equity
-Retained Earnings
-Current Year Earnings
-Total Equity
+Total Equity等，具体参照上传的BS表文件
 2. 按照如下对应关系从PL和BS中提取汇总字段：
 
 - Revenue: PL表的Total Income
@@ -355,7 +163,11 @@ Total Equity
                 ],
                 input=f"我给你了两个.xlsx文件，分别是{entity}公司{financial_year}年的PL表和BS表，请给我一个汇总表格"
             )
-            logger.info(f"OpenAI请求成功，Response ID: {response.id}")
+            logger.info(f"AI处理完成，Response ID: {response.id}")
+            
+            # AI处理完成后等待，避免立即进行文件下载
+            logger.info("步骤2完成，等待2秒后进行文件下载...")
+            time.sleep(2)
             
             # 打印完整的response结构，用于调试
             logger.info("Response结构详情:")
@@ -415,6 +227,7 @@ Total Equity
         logger.info(f"提取到cfile_id: {cfile_id}")
         
         # 下载并保存文件，使用指数退避
+        logger.info("步骤3: 开始下载生成的文件")
         output_file_content = api_request_with_backoff(
             client.containers.files.content.retrieve,
             container_id=container_id, 
