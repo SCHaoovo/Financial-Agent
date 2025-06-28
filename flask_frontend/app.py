@@ -546,7 +546,7 @@ def api_generate_summary():
                 result = backend_response.json()
                 logger.info(f"JSON响应解析成功: {result}")
 
-                # 查找文件路径信息
+                # 查找输出文件路径
                 file_path_in_response = None
                 possible_keys = ['file_path', 'output_file', 'summary_file', 'result_file']
 
@@ -556,99 +556,24 @@ def api_generate_summary():
                         logger.info(f"从JSON响应中找到文件路径 ({key}): {file_path_in_response}")
                         break
 
-                # 如果JSON中没有直接的文件路径，检查是否有嵌套结构
+                # 从消息中提取文件路径（备用方案）
                 if not file_path_in_response and 'message' in result:
-                    message = result['message']
-                    # 从日志消息中提取文件路径
-                    if '已成功保存汇总文件:' in message:
-                        import re
-                        path_match = re.search(r'已成功保存汇总文件:\s*([^\s,，]+)', message)
-                        if path_match:
-                            file_path_in_response = path_match.group(1).strip()
-                            logger.info(f"从消息中提取的文件路径: {file_path_in_response}")
+                    import re
+                    match = re.search(r'已成功生成.*汇总.*:\s*([^\s,，]+)', result['message'])
+                    if match:
+                        file_path_in_response = match.group(1).strip()
+                        logger.info(f"从消息中提取的文件路径: {file_path_in_response}")
 
-                # 如果找到了文件路径，尝试复制文件
                 if file_path_in_response:
-                    logger.info(f"准备处理文件: {file_path_in_response}")
-
-                    if os.path.exists(file_path_in_response):
-                        logger.info(f"找到生成的文件: {file_path_in_response}")
-
-                        filename = f"Summary_{entity}_{financial_year}.xlsx"
-                        os.makedirs(app.config['DOWNLOADS_FOLDER'], exist_ok=True)
-                        downloads_path = os.path.join(app.config['DOWNLOADS_FOLDER'], filename)
-
-                        try:
-                            shutil.copy2(file_path_in_response, downloads_path)
-                            logger.info(f"文件已从 {file_path_in_response} 复制到 {downloads_path}")
-
-                            if os.path.exists(downloads_path) and os.path.getsize(downloads_path) > 0:
-                                return jsonify({
-                                    'success': True,
-                                    'message': '汇总生成成功！',
-                                    'download_url': url_for('download_file', filename=filename),
-                                    'file_type': 'xlsx',
-                                    'original_path': file_path_in_response
-                                })
-                            else:
-                                logger.error("复制的文件为空或不存在")
-                                return jsonify({
-                                    'success': False,
-                                    'message': '生成的文件为空'
-                                }), 500
-                        except Exception as e:
-                            logger.error(f"复制文件失败: {str(e)}")
-                            return jsonify({
-                                'success': False,
-                                'message': f'复制文件失败: {str(e)}'
-                            }), 500
-                    else:
-                        logger.error(f"指定的文件路径不存在: {file_path_in_response}")
-
-                        # 尝试在预期的目录中查找文件
-                        expected_dirs = [
-                            settings.PROCESSED_DATA_DIR + '/summary',
-                            os.path.join(settings.PROCESSED_DATA_DIR, 'summary'),
-                            app.config['DOWNLOADS_FOLDER']
-                        ]
-
-                        found_file = None
-                        for search_dir in expected_dirs:
-                            logger.info(f"搜索目录: {search_dir}")
-                            if os.path.exists(search_dir):
-                                for filename in os.listdir(search_dir):
-                                    if entity in filename and filename.endswith(('.docx', '.xlsx')):
-                                        found_file = os.path.join(search_dir, filename)
-                                        logger.info(f"找到匹配文件: {found_file}")
-                                        return handle_summary_output_file(found_file, entity, financial_year, result)
-
-                        if found_file:
-                            logger.info(f"使用搜索到的文件: {found_file}")
-                            return handle_summary_output_file(found_file, entity, financial_year, result)
-                        else:
-                            # 尝试在预期的目录中查找文件
-                            expected_dirs = [
-                                settings.PROCESSED_DATA_DIR + '/summary',
-                                os.path.join(settings.PROCESSED_DATA_DIR, 'summary'),
-                                app.config['DOWNLOADS_FOLDER']
-                            ]
-
-                            for search_dir in expected_dirs:
-                                logger.info(f"搜索目录: {search_dir}")
-                                if os.path.exists(search_dir):
-                                    for filename in os.listdir(search_dir):
-                                        if entity in filename and filename.endswith(('.docx', '.xlsx')):
-                                            found_file = os.path.join(search_dir, filename)
-                                            logger.info(f"找到匹配文件: {found_file}")
-                                            return handle_summary_output_file(found_file, entity, financial_year,
-                                                                              result)
-
-                # 如果没有找到文件路径，返回JSON结果
-                return jsonify({
-                    'success': True,
-                    'message': '汇总处理完成',
-                    'result': result
-                })
+                    # 处理输出文件
+                    return handle_summary_output_file(file_path_in_response, entity, financial_year, result)
+                else:
+                    # 没有文件路径，返回基本成功响应
+                    return jsonify({
+                        'success': True,
+                        'message': '汇总生成完成',
+                        'result': result
+                    })
 
             except ValueError as json_error:
                 logger.warning(f"响应不是JSON格式: {str(json_error)}")
