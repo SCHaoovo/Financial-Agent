@@ -409,55 +409,7 @@ Total Equity
         # 校验提取结果
         if not container_id or not cfile_id:
             logger.error("未能从response中提取container_id或cfile_id")
-            
-            # 如果找到了container_id但没有cfile_id，尝试轮询容器获取文件
-            if container_id and not cfile_id:
-                logger.info(f"已找到container_id: {container_id}，但未找到cfile_id，尝试从容器获取文件")
-                
-                # 轮询容器状态，等待处理完成
-                max_retries = 10
-                retry_interval = 2
-                
-                for attempt in range(max_retries):
-                    try:
-                        logger.info(f"轮询容器状态 (尝试 {attempt+1}/{max_retries})")
-                        container_status = api_request_with_backoff(
-                            client.containers.retrieve,
-                            container_id=container_id
-                        )
-                        
-                        if container_status.status == "active":
-                            # 从容器中获取文件列表
-                            files = api_request_with_backoff(
-                                client.containers.files.list,
-                                container_id=container_id
-                            )
-                            
-                            if files and files.data and len(files.data) > 0:
-                                # 优先查找xlsx文件
-                                for file in files.data:
-                                    if file.filename.endswith('.xlsx'):
-                                        cfile_id = file.id
-                                        logger.info(f"从容器找到Excel文件: {cfile_id}, {file.filename}")
-                                        break
-                                
-                                # 如果没有找到xlsx文件，使用第一个文件
-                                if not cfile_id:
-                                    cfile_id = files.data[0].id
-                                    logger.info(f"从容器使用第一个文件: {cfile_id}, {files.data[0].filename}")
-                                
-                                break
-                            else:
-                                logger.info("容器中没有文件，继续等待")
-                        
-                        time.sleep(retry_interval)
-                    except Exception as e:
-                        logger.error(f"轮询容器状态失败: {str(e)}")
-                        time.sleep(retry_interval)
-            
-            # 如果仍未找到必要的ID，则抛出异常
-            if not container_id or not cfile_id:
-                raise ValueError("未能从response中提取container_id或cfile_id")
+            raise ValueError("未能从response中提取container_id或cfile_id")
 
         logger.info(f"提取到container_id: {container_id}")
         logger.info(f"提取到cfile_id: {cfile_id}")
