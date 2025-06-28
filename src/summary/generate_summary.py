@@ -1,6 +1,7 @@
 """
 财务数据汇总模块 - 使用OpenAI API处理PL和BS数据
 """
+import os
 import logging
 import time
 import backoff
