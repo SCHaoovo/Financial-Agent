@@ -10,6 +10,7 @@ from openai import OpenAI
 from openai import APIError, RateLimitError
 from typing import Optional
 from src.config import get_settings
+import uuid
 
 # 设置日志
 logging.basicConfig(
@@ -61,9 +62,11 @@ def generate_summary(
     Returns:
         输出文件的路径
     """
+    request_id = str(uuid.uuid4())[:8]
+    
     try:
-        logger.info(f"开始处理财务数据汇总: 实体={entity}, 年份={financial_year}")
-        logger.info(f"输入文件: PL={pl_file_path}, BS={bs_file_path}")
+        logger.info(f"[{request_id}] 开始处理财务数据汇总: 实体={entity}, 年份={financial_year}")
+        logger.info(f"[{request_id}] 输入文件: PL={pl_file_path}, BS={bs_file_path}")
         
         # 初始化OpenAI客户端
         client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
@@ -72,7 +75,7 @@ def generate_summary(
         
         # 上传文件并获取file_id，使用指数退避
         try:
-            logger.info("步骤1: 开始上传文件")
+            logger.info(f"[{request_id}] 步骤1: 开始上传文件")
             # 上传PL文件
             with open(pl_file_path, "rb") as pl_file:
                 time.sleep(2)  # 避免连续请求
@@ -92,19 +95,19 @@ def generate_summary(
                 )
             
             file_ids = [resp1.id, resp2.id]
-            logger.info(f"文件上传成功，获取到file_ids: {file_ids}")
+            logger.info(f"[{request_id}] 文件上传成功，获取到file_ids: {file_ids}")
             
             # 上传完成后等待，避免立即进行AI处理
-            logger.info("步骤1完成，等待3秒后进行AI处理...")
+            logger.info(f"[{request_id}] 步骤1完成，等待3秒后进行AI处理...")
             time.sleep(3)
             
         except Exception as e:
-            logger.error(f"文件上传失败: {str(e)}")
+            logger.error(f"[{request_id}] 文件上传失败: {str(e)}")
             raise
 
         # 构建Code Interpreter请求，不使用重试机制
         try:
-            logger.info("步骤2: 开始AI处理")
+            logger.info(f"[{request_id}] 步骤2: 开始AI处理")
             response = client.responses.create(
                 model="gpt-4o",
                 instructions=f"""
@@ -164,20 +167,20 @@ Total Equity等，具体参照上传的BS表文件
                 ],
                 input=f"我给你了两个.xlsx文件，分别是{entity}公司{financial_year}年的PL表和BS表，请给我一个汇总表格"
             )
-            logger.info(f"AI处理完成，Response ID: {response.id}")
+            logger.info(f"[{request_id}] AI处理完成，Response ID: {response.id}")
             
             # AI处理完成后等待，避免立即进行文件下载
-            logger.info("步骤2完成，等待2秒后进行文件下载...")
+            logger.info(f"[{request_id}] 步骤2完成，等待2秒后进行文件下载...")
             time.sleep(2)
             
             # 打印完整的response结构，用于调试
-            logger.info("Response结构详情:")
+            logger.info(f"[{request_id}] Response结构详情:")
             # logger.info(f"Response类型: {type(response)}")
             # logger.info(f"Response属性: {dir(response)}")
-            logger.info(f"Response内容: {response}")
+            logger.info(f"[{request_id}] Response内容: {response}")
             
             # 打印output结构
-            logger.info("Output结构详情:")
+            logger.info(f"[{request_id}] Output结构详情:")
             if hasattr(response, 'output'):
                 # logger.info(f"Output类型: {type(response.output)}")
                 # logger.info(f"Output长度: {len(response.output)}")
@@ -192,12 +195,12 @@ Total Equity等，具体参照上传的BS表文件
                             # logger.info(f"Output[{i}].content[{j}]类型: {type(block)}")
                             # logger.info(f"Output[{i}].content[{j}]属性: {dir(block)}")
                             if hasattr(block, "annotations"):
-                                logger.info(f"Annotations: {block.annotations}")
+                                logger.info(f"[{request_id}] Annotations: {block.annotations}")
             else:
-                logger.info("Response没有output属性")
+                logger.info(f"[{request_id}] Response没有output属性")
                 
         except Exception as e:
-            logger.error(f"OpenAI请求失败: {str(e)}")
+            logger.error(f"[{request_id}] OpenAI请求失败: {str(e)}")
             raise
         
         # 初始化变量
@@ -221,14 +224,14 @@ Total Equity等，具体参照上传的BS表文件
 
         # 校验提取结果
         if not container_id or not cfile_id:
-            logger.error("未能从response中提取container_id或cfile_id")
+            logger.error(f"[{request_id}] 未能从response中提取container_id或cfile_id")
             raise ValueError("未能从response中提取container_id或cfile_id")
 
-        logger.info(f"提取到container_id: {container_id}")
-        logger.info(f"提取到cfile_id: {cfile_id}")
+        logger.info(f"[{request_id}] 提取到container_id: {container_id}")
+        logger.info(f"[{request_id}] 提取到cfile_id: {cfile_id}")
         
         # 下载并保存文件，使用指数退避
-        logger.info("步骤3: 开始下载生成的文件")
+        logger.info(f"[{request_id}] 步骤3: 开始下载生成的文件")
         output_file_content = api_request_with_backoff(
             client.containers.files.content.retrieve,
             container_id=container_id, 
@@ -241,7 +244,7 @@ Total Equity等，具体参照上传的BS表文件
             summary_dir = os.path.join(settings.PROCESSED_DATA_DIR, "summary")
             os.makedirs(summary_dir, exist_ok=True)
             output_file = os.path.join(summary_dir, f"PL&BS_{entity}_{financial_year}.xlsx")
-            logger.info(f"使用默认输出路径: {output_file}")
+            logger.info(f"[{request_id}] 使用默认输出路径: {output_file}")
         
         # 确保输出目录存在
         output_dir = os.path.dirname(output_file)
@@ -251,11 +254,11 @@ Total Equity等，具体参照上传的BS表文件
         with open(output_file, "wb") as f:
             f.write(output_file_content.read())
         
-        logger.info(f"已成功保存汇总文件: {output_file}")
+        logger.info(f"[{request_id}] 已成功保存汇总文件: {output_file}")
         return output_file
         
     except Exception as e:
-        logger.error(f"生成财务数据汇总时出错: {str(e)}")
+        logger.error(f"[{request_id}] 生成财务数据汇总时出错: {str(e)}")
         raise
 
 

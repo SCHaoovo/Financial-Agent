@@ -111,12 +111,15 @@ async def generate_summary_api(
         )
         logger.info(f"汇总文件生成完成: {output_file}")
         
+        # 提取文件名用于下载链接
+        filename = os.path.basename(output_file)
+        
         return SummaryResponse(
             entity=entity,
             financial_year=financial_year,
-            output_file=output_file,
+            output_file=filename,  # 只返回文件名，不是完整路径
             status="success",
-            message=f"已成功生成{financial_year}年财务数据汇总"
+            message=f"已成功生成{financial_year}年财务数据汇总。下载链接: /finance/summary/download/{filename}"
         )
     
     except Exception as e:
@@ -148,10 +151,16 @@ async def download_summary(filename: str):
         if not os.path.exists(file_path):
             raise HTTPException(status_code=404, detail=f"文件不存在: {filename}")
         
+        # 添加更多的响应头支持
         return FileResponse(
             path=file_path,
             filename=filename,
-            media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            headers={
+                "Content-Disposition": f"attachment; filename={filename}",
+                "Access-Control-Expose-Headers": "Content-Disposition",
+                "Cache-Control": "no-cache"
+            }
         )
     
     except Exception as e:
