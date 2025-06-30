@@ -122,6 +122,12 @@ Net Profit/(Loss)等，具体参照上传的PL表文件
 Cash On Hand
 Total Long Term Liabilities
 Total Equity等，具体参照上传的BS表文件
+以下是一段读取的示例代码：
+    df = pd.read_excel("PL24.xlsx", skiprows=9)
+    df = df.iloc[:, 1:]
+    df = df.drop(index=0)
+这样的代码可以帮助你跳过表头与空行。
+
 2. 按照如下对应关系从PL和BS中提取汇总字段：
 
 - Revenue: PL表的Total Income
@@ -155,6 +161,7 @@ Total Equity等，具体参照上传的BS表文件
 6. 你不需要生成任何自然语言输出，最终输出结果只需要容器中的Excel文件。
 
 请你务必保证容器中能生成最终Excel文件，无论中途遇到任何数据清洗问题，都要以写出文件为最终目标。
+在生成 summary 文件后，务必将该文件对象作为 Code Interpreter 的输出显式返回，以便我在 response.output.annotations 中拿到 cfile_id。
 """,
                 tools=[
                     {
