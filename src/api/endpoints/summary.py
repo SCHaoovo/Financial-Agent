@@ -43,15 +43,6 @@ def safe_cleanup_temp_dir(temp_dir: str, max_retries: int = 3, delay: float = 0.
             break
 
 
-class SummaryResponse(BaseModel):
-    """汇总响应模型"""
-    entity: str
-    financial_year: str
-    output_file: str
-    status: str
-    message: str
-
-
 @router.post("/generate")
 async def generate_summary_api(
     pl_file: UploadFile = File(..., description="利润表Excel文件"),
@@ -111,15 +102,11 @@ async def generate_summary_api(
         )
         logger.info(f"汇总文件生成完成: {output_file}")
         
-        # 提取文件名用于下载链接
-        filename = os.path.basename(output_file)
-        
-        return SummaryResponse(
-            entity=entity,
-            financial_year=financial_year,
-            output_file=filename,  # 只返回文件名，不是完整路径
-            status="success",
-            message=f"已成功生成{financial_year}年财务数据汇总。下载链接: /finance/summary/download/{filename}"
+        # 直接返回文件下载，与其他接口保持一致
+        return FileResponse(
+            path=output_file,
+            filename=os.path.basename(output_file),
+            media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
     
     except Exception as e:
