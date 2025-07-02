@@ -2223,6 +2223,7 @@ def internal_error(error):
 
 
 if __name__ == '__main__':
-    # 运行应用
+    # 本地开发时运行应用，Render环境通过start_frontend_render.py启动
     port = int(os.environ.get('PORT', 5000))
-    app.run(debug=False, host='0.0.0.0', port=port)
+    print(f"🚀 Running Flask app locally on port {port}")
+    app.run(debug=True, host='0.0.0.0', port=port)
