@@ -271,6 +271,11 @@ def generate_summary(
 - 不要添加任何额外的文字说明，只执行代码
 - 请你务必保证容器中能生成最终Excel文件，无论中途遇到任何数据清洗问题，都要以写出文件为最终目标。
 - 在生成 summary 文件后，务必将该文件对象作为 Code Interpreter 的输出显式返回，以便我在 response.output.annotations 中拿到 cfile_id。
+**最后两行代码必须是**：
+```python
+df.to_excel("/mnt/data/test_output.xlsx", index=False)
+with open("/mnt/data/test_output.xlsx", "rb") as f:
+    f.read()
 """
             
             response = client.responses.create(

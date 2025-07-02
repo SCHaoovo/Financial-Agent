@@ -102,18 +102,12 @@ async def generate_summary_api(
         )
         logger.info(f"汇总文件生成完成: {output_file}")
         
-        # 返回JSON响应，包含文件路径信息，与前端期望的格式匹配
-        return {
-            "success": True,
-            "message": f"汇总文件已成功生成: {os.path.basename(output_file)}",
-            "file_path": output_file,
-            "output_file": output_file,
-            "summary_file": output_file,
-            "result_file": output_file,
-            "filename": os.path.basename(output_file),
-            "entity": entity,
-            "financial_year": financial_year
-        }
+        # 返回文件下载，与其他接口保持一致
+        return FileResponse(
+            path=output_file, 
+            filename=os.path.basename(output_file),
+            media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
     
     except Exception as e:
         logger.error(f"生成汇总时出错: {str(e)}")
