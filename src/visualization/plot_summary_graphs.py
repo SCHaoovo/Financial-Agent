@@ -61,42 +61,83 @@ def plot_summary_graphs(
         try:
             response = client.responses.create(
                 model="gpt-4o",
-                instructions="""你是一个精通金融数据分析的工程师，熟练掌握Python，Pandas，Matplotlib等数据分析与可视化工具。
-首先你将会被输入一个或多个Summary Table数据，输入格式为.xlxs文件，这个文件中可能有多个表格的数据。请你使用Python进行数据的读取。
-PL的Schema中，Column包含：
-Entities
-Financial Year
-Account Description 1
-Account Description 2
-July
-August
-September
-October
-November
-December
-January
-February
-March
-April
-May
-June
-Total
-前面是公司名称、年份和项目名称，之后是月份数据比如January，February等，最后一列是Total数据，是前面月份的累加和。
-Row是字段，以Account Description 2下的字段为主，比如：
-Revenue
-COS
-Administrative Expenses
-Loan Interest - NAB
-Loan Interest - Partners / Inter-co
-Other Income
-Net Profit/(Loss)
-Cash Balance
-Loan Payable - NAB
-Loan Payables - Partners / Inter-co Loan
-Total Equity
-区分这个表格中的数据是否是同一张表主要通过Financial Year判断。
-你的工作是需要对输入的这个表格进行可视化分析，主要通过Matplotlib来绘制4张图，这个时候请确保你已经获得了充分的数据。可视化非常简单，y-axis是变量的amount，x-axis是月份。其中默认4个Account Description 2下的变量，分别是Revenue，Administrative Expenses，Net Profit/(Loss)，Cash vs Loans。其中不同的线代表不同表格的数据比如FY25 Actual, FY24 Actual等，此处的名字来自于Financial Year栏。
-最终输出在一个Word文档中，文档的命名请参考公司名称。""",
+                instructions="""你是一个擅长使用 Python、Pandas 和 Matplotlib 的资深金融数据可视化专家。
+                
+                你将接收到一个 Summary Table 格式的 Excel 文件，其中包含多个财务年度的月度财务数据。你的任务是读取、清洗并生成基础的趋势图表，并将结果导出为 Word 文件。
+                
+### 表格格式说明：
+
+Excel 文件中包含一张或多张表格，表结构如下：
+
+- 列（Columns）包括：
+  - Entities（公司名）、Financial Year（如 FY24 Actual）、Account Description 1、Account Description 2
+  - 各个月份：July 到 June（12列）
+  - Total（全年合计）
+
+- 行（Rows）是财务项目，以 Account Description 2 为主，示例如下：
+  - Revenue、COS、Administrative Expenses、Net Profit/(Loss)、Cash Balance、Loan Payables、Total Equity 等
+
+---
+
+### 工作任务（请依步骤完成）
+
+### 1. 数据读取与清洗
+- 使用 Pandas 读取 Excel 文件；
+- 按照 Financial Year 分组，提取以下四个字段的 12 个月数据：
+  - Revenue
+  - COS
+  - Administrative Expenses
+  - Net Profit/(Loss)
+
+### 2. 图表生成
+请使用 Matplotlib 生成以下图像，图表风格简洁、统一，横轴为月份（July ~ June）：
+请生成一张图，包含 4 个子图，每个子图展示一个指标的“不同财年月度对比折线图”，要求如下：
+
+####  图像结构
+- 使用 `matplotlib` 的 subplot 排版为 2 行 × 2 列，共 4 个子图；
+- 整张图大小设为 `figsize=(12, 8)`；
+- 主标题使用 "Financial Metrics Monthly Comparison by Financial Year"，字号请比子标题大一些
+- 字体统一使用Arial
+
+####  背景与美观
+- 整张图背景为白色（`fig.patch.set_facecolor("white")`）；
+- 每个子图绘图区背景设置为浅灰色 `#f0f0f0`（使用 `ax.set_facecolor(...)`）；
+
+####  主色调设置（每个指标固定颜色）：
+- Revenue：红色
+- COS：橙色
+- Administrative Expenses：蓝色
+- Net Profit/(Loss)：绿色
+
+> 同一指标的不同财年：请使用**同一色系不同深浅** + **线型变化（如实线、虚线）** 进行区分；比如深红直线与浅红虚线
+> 所有线条 `linewidth=2`，确保清晰可读；
+
+#### ️ 坐标轴与标签
+- 横轴为月份（July ~ June），如有重叠请使用 `plt.xticks(rotation=30)`；
+- 总图的标题为"Monthly Comparison by Financial Year"
+- 所有子图需有标题格式：“{变量名} Comparison”
+- 图例放在图内右上角或右侧，使用 `ax.legend(title="Financial Year")`
+
+### 3. Word 文件输出
+- 文档可选封面，不强制图注；
+- 使用 `docx` 标准样式即可，避免复杂排版。
+
+### 输出要求
+
+- 最终必须输出一个 Word 文件 `Visualization_{公司名}.docx`；
+- 无论中间是否有数据缺失或图表部分失败，**都必须创建并返回 Word 文件对象**；
+- 使用 `Code Interpreter` 工具生成文件，并**明确将该文件作为输出返回**，以便我在 response.output.annotations 中拿到 `cfile_id`；
+- 请勿中断任务，也不要只输出图像或自然语言内容，**必须返回 Word 文件本体**。
+
+---
+
+### 注意事项
+
+- 不要求添加表格汇总、统计指标；
+- 请勿省略 Word 文件返回；
+- 保持图像大小适中（避免高清过大）。
+
+""",
                 tools=[
                     {
                         "type": "code_interpreter",
@@ -172,8 +213,8 @@ Total Equity
 # 示例用法
 if __name__ == "__main__":
     # 示例调用
-    database_file = "E:\Finance\Financial_Backend\data\processed\database\DB_Company.xlsx"
-    entity = "Lillco"
+    database_file = "E:\Finance\Financial_Backend\data\processed\database\DB_Test0701.xlsx"
+    entity = "Test0711"
     
     try:
         output_path = plot_summary_graphs(database_file, entity)

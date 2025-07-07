@@ -67,21 +67,36 @@ def generate_report_analysis(
             response = client.responses.create(
                 model="gpt-4o",
                 instructions="""
-    你是一个精通金融数据分析的工程师，你的任务是是对数据进行细致的report分析，你已经拥有了世界顶尖金融公司分析，极其专业的金融报告分析方法。用户的输入通常有一个包含数据的.xlsx文件，你能够获取的数据通常像下面这个样子：
-$	FY25 YTD **	FY25 Forecast	FY25 Budget	FY24 Actual
-Total Revenue	7,559,458	9,103,639	7,452,733	13,678,503
-Total COS	4,495,889	5,603,824	6,123,846	9,910,229
-Total Admin Expenses	212,817	291,157	394,680	526,493
-Total Interest - NAB	271,764	271,764	401,965	694,388
-Total Interest - Partners	150,121	173,432	133,410	242,237
-Total Other Income	578,493	648,463	29,169	599,787
-Total Net Profit	3,007,359	3,411,925	428,003	2,904,944
-Cash Balance	279,830	1,987,359	(2,454,762)	360,399
-Loan Payables - NAB	-	-	3,389,399	3,985,730
-Loan Payables - Partners	1,100,000	1,100,000	-	1,600,000
-对其进行深刻的分析，解析报表结构、调用对比逻辑、生成摘要评价，涵盖同比、预算差异、贷款分析等指标，最终输出一个word文档
-公司名称请从文件中的Entities列提取。
-重要：请将使用的Token控制在25000以内""",
+    你是一个精通金融数据分析的工程师，你的任务是是对数据进行细致的report分析，你已经拥有了世界顶尖金融公司分析，极其专业的金融报告分析方法。
+    你将接收到一个 Summary Table 格式的 Excel 文件，其中包含多个财务年度的月度财务数据。你需要做以下的工作
+
+1. 报告开头必须插入一张标准的 Word 表格（Table 对象），用于展示每项财务指标在每个 Financial Year 下的汇总值：
+   - 行为：Account Description 2（财务项目）
+   - 列为：Financial Year（如 FY24 Actual、FY25 Forecast、FY25 Budget 等）
+   - 单元格值为：该年度对应项目的 Total 总额
+   请使用标准表格格式，非纯文本对齐。表格应居中显示，列宽合理，字体清晰，作为报告的第一部分。
+2. Financial Year可能分为Actual、Forecast和Budget三种
+3. 对每项财务指标进行逐项同比（Year-over-Year, YoY）分析：
+   - 比较连续年度之间该项数据的增长或下降百分比；
+   - 明确指出变化幅度显著的项目；
+   - 提出可能的业务原因或财务解释。
+3. 如果存在 Budget 数据，对比每年的 Actual 与 Budget，找出预算差异较大的项目，说明其可能的业务原因；
+4. 如果存在 Forecast 数据，请补充分析其与当年Actual数据的实际和预算的偏差；
+5. 对贷款类（如 Loan Payables - NAB / Partners）和利润类（如 Net Profit）科目进行重点剖析，判断企业偿债能力和盈利能力；
+6. 提取公司名称（Entities列）作为报告头部信息；
+7. 最终生成一份结构清晰、专业严谨的 Word 财务分析报告文档。
+
+请确保报告内容覆盖以上要点，并保持用词专业，结构清晰
+报告请使用英文，字体Times New Roman，15磅，单倍行距
+
+### 输出要求
+
+- 最终必须输出一个 Word 文件 `Visualization_{公司名}.docx`；
+- 无论中间是否有数据缺失或图表部分失败，**都必须创建并返回 Word 文件对象**；
+- 使用 `Code Interpreter` 工具生成文件，并**明确将该文件作为输出返回**，以便我在 response.output.annotations 中拿到 `cfile_id`；
+- 请勿中断任务，也不要只输出图像或自然语言内容，**必须返回 Word 文件本体**。
+
+""",
                 tools=[
                     {
                         "type": "code_interpreter",
@@ -161,7 +176,7 @@ Loan Payables - Partners	1,100,000	1,100,000	-	1,600,000
 # 示例用法
 if __name__ == "__main__":
     # 示例调用
-    database_file = "E:\Finance\Financial_Backend\data\processed\database\DB_Company.xlsx"
+    database_file = "E:\Finance\Financial_Backend\data\processed\database\DB_Test0701.xlsx"
     
     try:
         output_path = generate_report_analysis(database_file)
